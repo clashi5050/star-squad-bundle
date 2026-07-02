@@ -17,11 +17,11 @@ set -euo pipefail
 
 # ------------------------------- CONFIG --------------------------------------
 GITHUB_ORG="clashi5050"
-GITHUB_REPO="iac-patterns"
+GITHUB_REPO="star-squad-bundle"
 APP_NAME="gha-oidc-${GITHUB_REPO}-static-web-app"
 
 # GitHub environment these credentials are scoped to (matches workflow input).
-GH_ENVIRONMENT="sndx"
+GH_ENVIRONMENT="dev"
 
 # Remote-state backend coordinates are fixed in
 # Patterns/common/static-web-app/backend.hcl (committed) — nothing to set here.

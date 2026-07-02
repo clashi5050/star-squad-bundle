@@ -69,14 +69,14 @@ Create a **fine-grained** PAT scoped to exactly one repo:
 6. Generate, copy the token, then store it as the environment secret:
 
    ```bash
-   gh secret set GH_PAT --env sndx --repo clashi5050/iac-patterns --body '<pat>'
+   gh secret set GH_PAT --env sndx --repo clashi5050/star-squad-bundle --body '<pat>'
    ```
 
 Notes:
 - Set it at the **environment** level (`sndx`, etc.) so it lines up with the
   workflow's `environment: ${{ github.event.inputs.environment }}`, exactly like
   the `ARM_*` secrets set by `setup-oidc-and-secrets.sh`.
-- If `iac-modules` lives under a different owner than `iac-patterns`, create the
+- If `iac-modules` lives under a different owner than `star-squad-bundle`, create the
   token under that owner; fine-grained PATs are scoped per resource owner.
 
 ## Notes

@@ -69,7 +69,7 @@ jobs:
           content="${content//$'\r'/''}"
           # end of optional handling for multi line json
           echo $content
-          echo "::set-output name=matrix::$content"
+          echo "matrix=$content" >> "$GITHUB_OUTPUT"
 
       # Writes sensitive Azure credentials (client ID, subscription ID, tenant ID) into a Terraform variables file
       - name: Write tfvars
@@ -91,8 +91,6 @@ jobs:
           ENVIRONMENT: ${{ fromJson(steps.set-matrix.outputs.matrix).environment }}
           TYPE: ${{ fromJson(steps.set-matrix.outputs.matrix).type }}
           APP: ${{ fromJson(steps.set-matrix.outputs.matrix).app }}
-          TFSTATE_SA: ${{ vars.TFSTATE_SA }}
-          TFSTATE_RG: ${{ vars.TFSTATE_RG }}
         run: |
           # lowercase env vars so they match the ${company_loc} style placeholders in the template
           export company_loc="${COMPANY_LOC}"

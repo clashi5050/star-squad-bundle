@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Star Squad</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Star Squad">
+<meta name="theme-color" content="#0e1a3a">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230e1a3a'/%3E%3Ctext x='90' y='128' font-size='110' text-anchor='middle'%3E%E2%AD%90%3C/text%3E%3C/svg%3E">
+<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Star%20Squad%22%2C%22short_name%22%3A%22Star%20Squad%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230e1a3a%22%2C%22theme_color%22%3A%22%230e1a3a%22%2C%22start_url%22%3A%22.%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%253D%2527http%253A%252F%252Fwww.w3.org%252F2000%252Fsvg%2527%2520viewBox%253D%25270%25200%2520180%2520180%2527%253E%253Crect%2520width%253D%2527180%2527%2520height%253D%2527180%2527%2520rx%253D%252740%2527%2520fill%253D%2527%25230e1a3a%2527%252F%253E%253Ctext%2520x%253D%252790%2527%2520y%253D%2527128%2527%2520font-size%253D%2527110%2527%2520text-anchor%253D%2527middle%2527%253E%25E2%25AD%2590%253C%252Ftext%253E%253C%252Fsvg%253E%22%2C%22sizes%22%3A%22180x180%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D">
+<style>
+  :root{
+    --bg:#0e1a3a;
+    --panel:#16255a;
+    --sun:#ffd23f;
+    --coral:#ff5d5d;
+    --mint:#3ddc97;
+    --sky:#4cc9f0;
+    --grape:#b15dff;
+    --ink:#0b1230;
+    --cloud:#f4f7ff;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+    background:radial-gradient(120% 100% at 50% 0%,#1c3170 0%,var(--bg) 55%,#08122c 100%);
+    color:var(--cloud);
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  /* twinkling stars background */
+  .sky-dots{position:fixed;inset:0;pointer-events:none;z-index:0}
+  .sky-dots i{position:absolute;width:4px;height:4px;background:#fff;border-radius:50%;opacity:.5;animation:tw 3s infinite ease-in-out}
+  @keyframes tw{0%,100%{opacity:.2;transform:scale(.6)}50%{opacity:.9;transform:scale(1.2)}}
+
+  .wrap{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:16px 14px 40px}
+
+  header{text-align:center;margin:6px 0 14px}
+  .title{
+    font-size:34px;font-weight:800;letter-spacing:.5px;
+    background:linear-gradient(90deg,var(--sun),var(--coral),var(--grape),var(--sky));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 2px 0 rgba(0,0,0,.25));
+  }
+  .subtitle{font-size:14px;opacity:.7;margin-top:2px}
+
+  /* scoreboard */
+  .board{display:flex;gap:10px;margin-bottom:16px}
+  .kid{
+    flex:1;border-radius:22px;padding:14px 12px 16px;position:relative;overflow:hidden;
+    background:var(--panel);border:3px solid transparent;transition:transform .15s,border-color .2s;
+    cursor:pointer;
+  }
+  .kid.active{border-color:var(--sun);transform:translateY(-3px)}
+  .kid .avatar{font-size:44px;line-height:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.3))}
+  .kid .name{font-size:20px;font-weight:800;margin-top:2px}
+  .kid .pts{font-size:30px;font-weight:800;color:var(--sun);line-height:1.1}
+  .kid .pts small{font-size:13px;color:var(--cloud);opacity:.6;font-weight:600}
+  .kid .lead{position:absolute;top:8px;right:10px;font-size:22px;opacity:0;transition:opacity .3s}
+  .kid.winning .lead{opacity:1;animation:bob 1.2s infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+  .kid .barwrap{height:12px;background:rgba(0,0,0,.3);border-radius:99px;margin-top:10px;overflow:hidden}
+  .kid .bar{height:100%;width:0;border-radius:99px;transition:width .5s cubic-bezier(.2,.9,.3,1)}
+  .k1 .bar{background:linear-gradient(90deg,var(--sky),var(--mint))}
+  .k2 .bar{background:linear-gradient(90deg,var(--coral),var(--grape))}
+  .kid .goaltxt{font-size:11px;opacity:.6;margin-top:5px}
+
+  .whoseturn{text-align:center;font-size:15px;font-weight:700;margin:-4px 0 14px;opacity:.85}
+  .whoseturn b{color:var(--sun)}
+
+  /* task grid */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .task{
+    border:none;border-radius:24px;padding:18px 10px 16px;color:var(--ink);
+    font-family:inherit;font-weight:800;font-size:17px;cursor:pointer;position:relative;
+    box-shadow:0 6px 0 rgba(0,0,0,.25);transition:transform .08s,box-shadow .08s,filter .2s;
+    display:flex;flex-direction:column;align-items:center;gap:6px;min-height:118px;justify-content:center;
+  }
+  .task:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.25)}
+  .task .emoji{font-size:46px;line-height:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.2))}
+  .task .val{position:absolute;top:8px;right:12px;font-size:15px;font-weight:800;background:rgba(0,0,0,.15);padding:2px 8px;border-radius:99px}
+  .task.done{filter:saturate(.4) brightness(.85)}
+  .task.done::after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:60px;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.4);animation:pop .4s}
+  @keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+  .c-sun{background:var(--sun)} .c-coral{background:var(--coral)} .c-mint{background:var(--mint)}
+  .c-sky{background:var(--sky)} .c-grape{background:var(--grape)} .c-orange{background:#ff9f40}
+
+  /* prize row */
+  .prizebar{margin-top:20px;background:var(--panel);border-radius:22px;padding:16px}
+  .prizebar h2{font-size:16px;margin-bottom:12px;text-align:center;opacity:.85}
+  .prizes{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
+  .prize{
+    min-width:96px;flex-shrink:0;background:var(--ink);border-radius:18px;padding:12px 8px;text-align:center;
+    border:3px solid rgba(255,255,255,.08);transition:border-color .2s,transform .15s;
+  }
+  .prize.ready{border-color:var(--mint);animation:glow 1.5s infinite}
+  @keyframes glow{0%,100%{box-shadow:0 0 0 rgba(61,220,151,0)}50%{box-shadow:0 0 18px rgba(61,220,151,.6)}}
+  .prize .pe{font-size:34px}
+  .prize .pn{font-size:12px;font-weight:700;margin:4px 0}
+  .prize .pc{font-size:13px;font-weight:800;color:var(--sun)}
+  .prize .redeem{margin-top:6px;font-size:11px;font-weight:800;background:var(--mint);color:var(--ink);border:none;border-radius:99px;padding:4px 10px;cursor:pointer;opacity:.35;pointer-events:none}
+  .prize.ready .redeem{opacity:1;pointer-events:auto}
+
+  /* controls */
+  .footer{margin-top:22px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .btn{background:transparent;border:2px solid rgba(255,255,255,.2);color:var(--cloud);font-family:inherit;font-weight:700;font-size:13px;padding:9px 16px;border-radius:99px;cursor:pointer}
+  .btn:active{transform:scale(.96)}
+
+  /* celebration overlay */
+  .cheer{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;pointer-events:none}
+  .cheer.show{display:flex}
+  .cheer .msg{font-size:64px;font-weight:800;color:#fff;text-shadow:0 4px 0 rgba(0,0,0,.3);animation:cheerpop .8s ease}
+  @keyframes cheerpop{0%{transform:scale(0) rotate(-15deg);opacity:0}40%{transform:scale(1.3) rotate(5deg);opacity:1}100%{transform:scale(1) rotate(0)}}
+  canvas#confetti{position:fixed;inset:0;z-index:49;pointer-events:none}
+
+  /* parent modal */
+  .modal{position:fixed;inset:0;background:rgba(6,10,26,.85);z-index:60;display:none;align-items:center;justify-content:center;padding:20px}
+  .modal.show{display:flex}
+  .card{background:var(--panel);border-radius:22px;padding:22px;max-width:360px;width:100%;max-height:85vh;overflow:auto}
+  .card h3{margin-bottom:14px;font-size:20px}
+  .card label{display:block;font-size:13px;opacity:.8;margin:12px 0 4px}
+  .card input{width:100%;padding:10px 12px;border-radius:12px;border:2px solid rgba(255,255,255,.15);background:var(--ink);color:var(--cloud);font-family:inherit;font-size:15px}
+  .card .row{display:flex;gap:10px;margin-top:18px}
+  .card .row .btn{flex:1;border-color:transparent;background:var(--sky);color:var(--ink)}
+  .card .row .btn.ghost{background:transparent;border:2px solid rgba(255,255,255,.2);color:var(--cloud)}
+  .lock{position:fixed;bottom:14px;right:14px;z-index:40;width:46px;height:46px;border-radius:50%;background:var(--panel);border:2px solid rgba(255,255,255,.15);color:#fff;font-size:20px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="sky-dots" id="dots"></div>
+
+<div class="wrap">
+  <header>
+    <div class="title">⭐ Star Squad ⭐</div>
+    <div class="subtitle">Tap what you did. Earn stars. Win prizes!</div>
+  </header>
+
+  <div class="board" id="board"></div>
+  <div class="whoseturn" id="turn"></div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="prizebar">
+    <h2>🎁 Prize Shop</h2>
+    <div class="prizes" id="prizes"></div>
+  </div>
+
+  <div class="footer">
+    <button class="btn" onclick="resetDay()">🔄 New Day</button>
+    <button class="btn" onclick="openParent()">🔒 Grown-Up Settings</button>
+    <button class="btn" onclick="backupData()">💾 Backup</button>
+    <button class="btn" onclick="document.getElementById('restoreFile').click()">📂 Restore</button>
+    <input type="file" id="restoreFile" accept="application/json,.json" style="display:none" onchange="restoreData(event)">
+  </div>
+</div>
+
+<button class="lock" onclick="openParent()" title="Grown-up settings">⚙️</button>
+
+<div class="cheer" id="cheer"><div class="msg" id="cheerMsg">YAY!</div></div>
+<canvas id="confetti"></canvas>
+
+<!-- Parent modal -->
+<div class="modal" id="modal">
+  <div class="card">
+    <h3>Grown-Up Settings 🔒</h3>
+    <div id="parentBody"></div>
+    <div class="row">
+      <button class="btn ghost" onclick="closeParent()">Close</button>
+      <button class="btn" onclick="saveParent()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- data ---------- */
+const DEFAULT = {
+  kids:[
+    {name:"Case", avatar:"🦁", points:0, goal:50},
+    {name:"Carmen", avatar:"🐯", points:0, goal:50}
+  ],
+  tasks:[
+    {emoji:"🦷", label:"Brush Teeth", val:5, color:"c-sky"},
+    {emoji:"👕", label:"Get Dressed", val:5, color:"c-sun"},
+    {emoji:"🧸", label:"Tidy Toys", val:5, color:"c-mint"},
+    {emoji:"🍎", label:"Ate Food", val:5, color:"c-coral"},
+    {emoji:"🚽", label:"Potty", val:5, color:"c-grape"},
+    {emoji:"😊", label:"Kind Words", val:5, color:"c-orange"},
+    {emoji:"🛏️", label:"Made Bed", val:5, color:"c-sky"},
+    {emoji:"👟", label:"Shoes On", val:5, color:"c-mint"}
+  ],
+  prizes:[
+    {emoji:"🍦", name:"Ice Cream", cost:20},
+    {emoji:"📺", name:"Show Time", cost:30},
+    {emoji:"🎮", name:"Game Time", cost:40},
+    {emoji:"🏞️", name:"Park Trip", cost:60},
+    {emoji:"🧁", name:"Bake Day", cost:80}
+  ]
+};
+let S = load();
+let active = 0; // whose turn is tapping
+
+function load(){
+  try{ const d = JSON.parse(localStorage.getItem("starSquad")); if(d&&d.kids) return d; }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT));
+}
+function save(){ try{localStorage.setItem("starSquad",JSON.stringify(S))}catch(e){} }
+
+/* ---------- render ---------- */
+function render(){
+  // board
+  const board = document.getElementById("board");
+  const max = Math.max(S.kids[0].points, S.kids[1].points);
+  board.innerHTML = S.kids.map((k,i)=>{
+    const pct = Math.min(100, Math.round(k.points/k.goal*100));
+    const winning = k.points===max && k.points>0 && S.kids[0].points!==S.kids[1].points;
+    return `<div class="kid k${i+1} ${i===active?'active':''} ${winning?'winning':''}" onclick="setActive(${i})">
+      <div class="lead">👑</div>
+      <div class="avatar">${k.avatar}</div>
+      <div class="name">${esc(k.name)}</div>
+      <div class="pts">${k.points}<small> / ${k.goal} ⭐</small></div>
+      <div class="barwrap"><div class="bar" style="width:${pct}%"></div></div>
+      <div class="goaltxt">${k.goal-k.points>0?(k.goal-k.points)+" to go!":"Goal smashed! 🎉"}</div>
+    </div>`;
+  }).join("");
+
+  document.getElementById("turn").innerHTML =
+    `Tapping for: <b>${S.kids[active].avatar} ${esc(S.kids[active].name)}</b> (tap the other name to switch)`;
+
+  // tasks
+  const done = S.kids[active].done || [];
+  document.getElementById("grid").innerHTML = S.tasks.map((t,i)=>`
+    <button class="task ${t.color} ${done.includes(i)?'done':''}" onclick="doTask(${i})">
+      <span class="val">+${t.val}</span>
+      <span class="emoji">${t.emoji}</span>
+      <span>${esc(t.label)}</span>
+    </button>`).join("");
+
+  // prizes
+  const pts = S.kids[active].points;
+  document.getElementById("prizes").innerHTML = S.prizes.map((p,i)=>`
+    <div class="prize ${pts>=p.cost?'ready':''}">
+      <div class="pe">${p.emoji}</div>
+      <div class="pn">${esc(p.name)}</div>
+      <div class="pc">${p.cost} ⭐</div>
+      <button class="redeem" onclick="redeem(${i})">Get it!</button>
+    </div>`).join("");
+
+  save();
+}
+function esc(s){return String(s).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}
+
+function setActive(i){ active=i; render(); }
+
+/* ---------- actions ---------- */
+const CHEERS=["YAY!","AWESOME!","WOOHOO!","SUPERSTAR!","NICE!","AMAZING!","GO YOU!","HIGH FIVE!"];
+function doTask(i){
+  const k = S.kids[active];
+  k.done = k.done || [];
+  if(k.done.includes(i)) return;          // already done today
+  k.done.push(i);
+  k.points += S.tasks[i].val;
+  celebrate(CHEERS[Math.floor(Math.random()*CHEERS.length)]);
+  ding();
+  render();
+}
+function redeem(i){
+  const p = S.prizes[i], k = S.kids[active];
+  if(k.points < p.cost) return;
+  k.points -= p.cost;
+  celebrate(p.emoji+" "+p.name.toUpperCase()+"!");
+  ding(true);
+  render();
+}
+function resetDay(){
+  S.kids.forEach(k=>k.done=[]);
+  render();
+  celebrate("NEW DAY!");
+}
+
+/* ---------- celebration ---------- */
+function celebrate(msg){
+  const c=document.getElementById("cheer");
+  document.getElementById("cheerMsg").textContent=msg;
+  c.classList.add("show");
+  fireConfetti();
+  setTimeout(()=>c.classList.remove("show"),1100);
+}
+
+/* confetti */
+const cv=document.getElementById("confetti"), ctx=cv.getContext("2d");
+let bits=[];
+function sizeCv(){cv.width=innerWidth;cv.height=innerHeight}
+sizeCv(); addEventListener("resize",sizeCv);
+const COLORS=["#ffd23f","#ff5d5d","#3ddc97","#4cc9f0","#b15dff","#ff9f40"];
+function fireConfetti(){
+  for(let i=0;i<90;i++){
+    bits.push({x:innerWidth/2,y:innerHeight/2,
+      vx:(Math.random()-.5)*16,vy:(Math.random()-.5)*16-4,
+      s:6+Math.random()*8,c:COLORS[i%COLORS.length],
+      rot:Math.random()*6,vr:(Math.random()-.5)*.4,life:70});
+  }
+  if(!raf) loop();
+}
+let raf=null;
+function loop(){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  bits.forEach(b=>{
+    b.vy+=.4;b.x+=b.vx;b.y+=b.vy;b.rot+=b.vr;b.life--;
+    ctx.save();ctx.translate(b.x,b.y);ctx.rotate(b.rot);
+    ctx.fillStyle=b.c;ctx.fillRect(-b.s/2,-b.s/2,b.s,b.s*.6);ctx.restore();
+  });
+  bits=bits.filter(b=>b.life>0 && b.y<cv.height+40);
+  if(bits.length){raf=requestAnimationFrame(loop)}
+  else{ctx.clearRect(0,0,cv.width,cv.height);raf=null}
+}
+
+/* sound (WebAudio, no files) */
+let ac;
+function ding(big){
+  try{
+    ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+    const notes= big?[523,659,784,1047]:[659,880];
+    notes.forEach((f,i)=>{
+      const o=ac.createOscillator(),g=ac.createGain();
+      o.type="triangle";o.frequency.value=f;
+      o.connect(g);g.connect(ac.destination);
+      const t=ac.currentTime+i*0.09;
+      g.gain.setValueAtTime(0,t);
+      g.gain.linearRampToValueAtTime(.25,t+0.02);
+      g.gain.exponentialRampToValueAtTime(0.001,t+0.28);
+      o.start(t);o.stop(t+0.3);
+    });
+  }catch(e){}
+}
+
+/* ---------- parent settings ---------- */
+function openParent(){
+  const b=document.getElementById("parentBody");
+  b.innerHTML = S.kids.map((k,i)=>`
+    <label>Kid ${i+1} name</label>
+    <input id="kn${i}" value="${esc(k.name)}">
+    <label>Kid ${i+1} emoji</label>
+    <input id="ke${i}" value="${esc(k.avatar)}" maxlength="4">
+    <label>Kid ${i+1} star goal</label>
+    <input id="kg${i}" type="number" value="${k.goal}">
+  `).join("") +
+  `<label>Points per task</label>
+   <input id="tval" type="number" value="${S.tasks[0].val}">
+   <hr style="border:none;border-top:2px solid rgba(255,255,255,.1);margin:20px 0 6px">
+   <label style="font-size:15px;opacity:1;font-weight:800">🎁 Prizes</label>
+   <div id="prizeEdit"></div>
+   <button class="btn" style="width:100%;margin-top:10px;border-color:var(--mint);color:var(--mint)" onclick="addPrize()">➕ Add a Prize</button>`;
+  renderPrizeEdit();
+  document.getElementById("modal").classList.add("show");
+}
+function renderPrizeEdit(){
+  document.getElementById("prizeEdit").innerHTML = S.prizes.map((p,i)=>`
+    <div style="display:flex;gap:6px;align-items:center;margin-top:8px">
+      <input id="pe${i}" value="${esc(p.emoji)}" maxlength="4" style="width:52px;text-align:center;padding:8px 4px" placeholder="🎁">
+      <input id="pn${i}" value="${esc(p.name)}" style="flex:1;padding:8px 10px" placeholder="Prize name">
+      <input id="pc${i}" type="number" value="${p.cost}" style="width:64px;padding:8px 6px" placeholder="⭐">
+      <button class="btn" style="padding:8px 10px;border-color:var(--coral);color:var(--coral)" onclick="removePrize(${i})">🗑️</button>
+    </div>`).join("");
+}
+function readPrizeEdit(){
+  S.prizes = S.prizes.map((p,i)=>({
+    emoji:(document.getElementById("pe"+i)?.value||p.emoji).trim()||"🎁",
+    name:(document.getElementById("pn"+i)?.value||p.name).trim()||"Prize",
+    cost:Math.max(1,parseInt(document.getElementById("pc"+i)?.value)||p.cost)
+  }));
+}
+function addPrize(){
+  readPrizeEdit();
+  S.prizes.push({emoji:"🎁", name:"New Prize", cost:25});
+  renderPrizeEdit();
+}
+function removePrize(i){
+  readPrizeEdit();
+  S.prizes.splice(i,1);
+  renderPrizeEdit();
+}
+function closeParent(){document.getElementById("modal").classList.remove("show")}
+function saveParent(){
+  S.kids.forEach((k,i)=>{
+    k.name=document.getElementById("kn"+i).value||k.name;
+    k.avatar=document.getElementById("ke"+i).value||k.avatar;
+    k.goal=Math.max(5,parseInt(document.getElementById("kg"+i).value)||k.goal);
+  });
+  const v=Math.max(1,parseInt(document.getElementById("tval").value)||5);
+  S.tasks.forEach(t=>t.val=v);
+  readPrizeEdit();
+  closeParent();render();
+}
+
+/* ---------- backup / restore (never lose progress) ---------- */
+function backupData(){
+  const blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url; a.download="star-squad-backup.json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  celebrate("SAVED! 💾");
+}
+function restoreData(e){
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      if(d&&d.kids&&d.tasks&&d.prizes){ S=d; save(); render(); celebrate("RESTORED! 📂"); }
+      else alert("That file doesn't look like a Star Squad backup.");
+    }catch(err){ alert("Couldn't read that backup file."); }
+  };
+  r.readAsText(f);
+  e.target.value="";
+}
+
+/* stars bg */
+(function(){const d=document.getElementById("dots");let h="";for(let i=0;i<40;i++){h+=`<i style="left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*3}s"></i>`}d.innerHTML=h})();
+
+render();
+</script>
+</body>
+</html>

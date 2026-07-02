@@ -1,0 +1,48 @@
+# Workflow name shown in the GitHub Actions UI
+name: 'Deploy Star Squad App'
+
+# Trigger: deploy the static content whenever the app files change on main,
+# and allow manual runs from the Actions UI.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/star-squad/**'
+      - '.github/workflows/static-web-app-deploy.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: 'Build and Deploy'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      # Pulls the repo so the app content is available to the deploy action
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          submodules: false
+          lfs: false
+
+      # Deploys the static content to the existing Azure Static Web App.
+      # The API token is generated when the SWA is provisioned (Terraform output
+      # api_key) and stored as the AZURE_STATIC_WEB_APPS_API_TOKEN secret.
+      # NOTE: Pin this to a specific commit SHA before use, matching your
+      # convention. Look up the latest release commit at:
+      # https://github.com/Azure/static-web-apps-deploy/releases
+      # then replace the tag below with @<full-40-char-sha>.
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@1a947af9992250f3bc2e68ad0754c0b0c11566c9  # v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: 'upload'
+          # Folder containing the app content (single index.html, no build step)
+          app_location: 'apps/star-squad'
+          # No API backend
+          api_location: ''
+          # Content is served straight from app_location (no build output folder)
+          output_location: ''
+          skip_app_build: true

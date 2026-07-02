@@ -1,0 +1,18 @@
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Sensitive / generated at runtime by the workflow (never commit these)
+**/terraform.auto.tfvars
+**/nonsecret.auto.tfvars
+
+# Terraform lock file is fine to commit; uncomment to ignore if you prefer
+# .terraform.lock.hcl
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp

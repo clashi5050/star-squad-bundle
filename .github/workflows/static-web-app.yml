@@ -1,0 +1,150 @@
+# Workflow name shown in the GitHub Actions UI
+name: 'Add Static Web App'
+
+# Trigger: this workflow only runs when manually triggered from the GitHub Actions UI
+on:
+  workflow_dispatch:
+    # Input parameters the user fills out before running the workflow
+    inputs:
+      short_loc:
+        description: 'Short name for Azure Region'
+        required: true
+        default: 'use2'
+      environment:
+        description: 'Environment (sndx, dev, test, np, stg, uat, prod)'
+        required: true
+        default: 'sndx'
+      destroy_after:
+        description: 'Do you want to destroy the resource after creation.(true/false)'
+        required: false
+        default: 'false'
+
+jobs:
+
+  terraform:
+    name: 'Terraform'
+    # Runner: uses a fresh Ubuntu VM hosted by GitHub
+    runs-on: ubuntu-latest
+    # Permissions required for OIDC token-based authentication to Azure (no client secrets needed)
+    permissions:
+      id-token: write
+      contents: read
+    # Targets the GitHub environment matching the user-selected input (controls which secrets are available)
+    environment: ${{ github.event.inputs.environment }}
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    # Environment variables available to all steps in this job
+    env:
+      ARM_USE_OIDC: "true"
+      TF_VAR_arm_client_id: ${{secrets.ARM_CLIENT_ID}}
+      TF_VAR_arm_subscription_id: ${{secrets.ARM_SUBSCRIPTION_ID}}
+      TF_VAR_arm_tenant_id: ${{secrets.ARM_TENANT_ID}}
+      TF_WORKING_DIR: './Patterns/common/static-web-app'
+      #TF_LOG: DEBUG
+    # Sets the default working directory for all run steps so paths are relative to the Terraform config
+    defaults:
+      run:
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+    steps:
+      # Authenticates the runner to Azure using OIDC federated credentials (no stored passwords)
+      - name: 'Login to Azure with OIDC federated credentials'
+        uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5
+        with:
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+
+      # Pulls the repo code onto the runner so subsequent steps can access the Terraform files
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      # Reads the environment-specific JSON input file and exposes it as a matrix output for later steps
+      - id: set-matrix
+        run: |
+          content=`cat ../../../.github/inputs/${{ github.event.inputs.environment }}/${{ github.event.inputs.short_loc }}/staticwebapp.json`
+          # the following lines are only required for multi line json
+          content="${content//'%'/'%25'}"
+          content="${content//$'\n'/''}"
+          content="${content//$'\r'/''}"
+          # end of optional handling for multi line json
+          echo $content
+          echo "::set-output name=matrix::$content"
+
+      # Writes sensitive Azure credentials (client ID, subscription ID, tenant ID) into a Terraform variables file
+      - name: Write tfvars
+        run: |
+          touch terraform.auto.tfvars
+          printf 'arm_client_id = "%s"\n' "$(echo "${TF_VAR_arm_client_id}" | tr -d '\n\r')" >> terraform.auto.tfvars
+          printf 'arm_subscription_id = "%s"\n' "$(echo "${TF_VAR_arm_subscription_id}" | tr -d '\n\r')" >> terraform.auto.tfvars
+          printf 'arm_tenant_id = "%s"\n' "$(echo "${TF_VAR_arm_tenant_id}" | tr -d '\n\r')" >> terraform.auto.tfvars
+          cat terraform.auto.tfvars
+        shell: bash
+
+      # Generates the non-sensitive tfvars and main.tf files by substituting environment-specific values
+      # from the JSON matrix into the template files
+      - name: Create non secret tfvars
+        env:
+          COMPANY_LOC: ${{ fromJson(steps.set-matrix.outputs.matrix).company_loc }}
+          LOCATION: ${{ fromJson(steps.set-matrix.outputs.matrix).location }}
+          SHORT_LOC: ${{ fromJson(steps.set-matrix.outputs.matrix).short_loc }}
+          ENVIRONMENT: ${{ fromJson(steps.set-matrix.outputs.matrix).environment }}
+          TYPE: ${{ fromJson(steps.set-matrix.outputs.matrix).type }}
+          APP: ${{ fromJson(steps.set-matrix.outputs.matrix).app }}
+          TFSTATE_SA: ${{ vars.TFSTATE_SA }}
+          TFSTATE_RG: ${{ vars.TFSTATE_RG }}
+        run: |
+          # lowercase env vars so they match the ${company_loc} style placeholders in the template
+          export company_loc="${COMPANY_LOC}"
+          export location="${LOCATION}"
+          export short_loc="${SHORT_LOC}"
+          export environment="${ENVIRONMENT}"
+          export type="${TYPE}"
+          export app="${APP}"
+          # Only nonsecret.auto.tfvars is templated. main.tf is static and reads
+          # these values as Terraform variables (no fragile main.tf templating).
+          eval "echo \"$(cat nonsecret.auto.tfvars.template)\"" > nonsecret.auto.tfvars
+          echo "----- nonsecret.auto.tfvars -----"
+          cat nonsecret.auto.tfvars
+
+      # Installs the Terraform CLI on the runner
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85
+
+      # Configures git to inject the PAT for any HTTPS GitHub requests so Terraform can
+      # download modules from the private iac-modules repo during init
+      - name: Configure git for module access
+        run: git config --global url."https://oauth2:${{ secrets.GH_PAT }}@github.com".insteadOf "https://github.com"
+
+      # Initializes Terraform: downloads providers/modules and connects to the
+      # Azure backend for state. Backend values are passed here (partial backend
+      # config) so main.tf stays static and per-env state keys stay unique.
+      - name: Terraform Init
+        id: init
+        env:
+          TFSTATE_SA: ${{ vars.TFSTATE_SA }}
+          TFSTATE_RG: ${{ vars.TFSTATE_RG }}
+          ENVIRONMENT: ${{ fromJson(steps.set-matrix.outputs.matrix).environment }}
+          SHORT_LOC: ${{ fromJson(steps.set-matrix.outputs.matrix).short_loc }}
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${TFSTATE_RG}" \
+            -backend-config="storage_account_name=${TFSTATE_SA}" \
+            -backend-config="container_name=tfstate" \
+            -backend-config="key=${ENVIRONMENT}-${SHORT_LOC}-static-web-app.tfstate"
+
+      # Generates an execution plan showing what resources will be created, changed, or destroyed (does not apply anything)
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color
+        continue-on-error: true
+
+      # Applies the Terraform plan and creates/updates the Azure Static Web App
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -auto-approve
+
+      # Optionally destroys the resource right after creation when destroy_after=true
+      - name: Terraform Destroy
+        if: ${{ github.event.inputs.destroy_after == 'true' }}
+        run: terraform destroy -auto-approve

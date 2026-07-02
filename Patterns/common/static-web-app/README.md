@@ -94,7 +94,12 @@ Notes:
   more robust — consider back-porting it to the resource-group pattern.
 - **Remote state backend.** Storage account, container, and resource group are
   fixed in the committed [`backend.hcl`](backend.hcl) (currently
-  `tfstatestoragelab2` / `tfstate` / `tfstatelab`). Only the state **key** —
+  `tfstatestoragelab2` / `tfstate` / `tfstatelab`). This storage account lives
+  in a *different* subscription (`cjsazurelab`) than the one resources are
+  deployed into (`arm_subscription_id`), so `backend.hcl` also pins an explicit
+  `subscription_id` — the deploy service principal needs `Storage Account
+  Contributor` on the `tfstatelab` resource group in that subscription for
+  backend init to read the storage account's keys. Only the state **key** —
   `<environment>-<short_loc>-static-web-app.tfstate` — still varies per
   deployment and is passed via `-backend-config` on `terraform init`, so it
   never collides with other patterns in the same storage account.

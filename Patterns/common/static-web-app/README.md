@@ -43,12 +43,8 @@ Secrets (per environment):
 | `GH_PAT` | Read access to the private `iac-modules` repo (module downloads) |
 | `AZURE_STATIC_WEB_APPS_API_TOKEN` | SWA content deployment token (set after step 1) |
 
-Variables:
-
-| Variable | Purpose |
-|---|---|
-| `TFSTATE_SA` | Storage account holding remote Terraform state |
-| `TFSTATE_RG` | Resource group of the state storage account |
+The remote state storage account/container/resource group are fixed in the
+committed [`backend.hcl`](backend.hcl) — no GitHub variables needed for these.
 
 ## Creating the `GH_PAT` (fine-grained)
 
@@ -96,6 +92,9 @@ Notes:
   `main.tf` here reads everything as Terraform variables. Only
   `nonsecret.auto.tfvars` is rendered from its template. This is intentional and
   more robust — consider back-porting it to the resource-group pattern.
-- **State key** is `<environment>-<short_loc>-static-web-app.tfstate`, passed via
-  `-backend-config` on `terraform init`, so it never collides with other
-  patterns in the same storage account.
+- **Remote state backend.** Storage account, container, and resource group are
+  fixed in the committed [`backend.hcl`](backend.hcl) (currently
+  `tfstatestoragelab2` / `tfstate` / `tfstatelab`). Only the state **key** —
+  `<environment>-<short_loc>-static-web-app.tfstate` — still varies per
+  deployment and is passed via `-backend-config` on `terraform init`, so it
+  never collides with other patterns in the same storage account.

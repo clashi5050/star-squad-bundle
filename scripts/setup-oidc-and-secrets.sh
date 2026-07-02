@@ -23,9 +23,8 @@ APP_NAME="gha-oidc-${GITHUB_REPO}-static-web-app"
 # GitHub environment these credentials are scoped to (matches workflow input).
 GH_ENVIRONMENT="sndx"
 
-# Remote-state backend (must already exist). Matches vars.TFSTATE_* in the repo.
-TFSTATE_RG="rg-tfstate"
-TFSTATE_SA="sttfstateexample"   # <-- set to your real state storage account
+# Remote-state backend coordinates are fixed in
+# Patterns/common/static-web-app/backend.hcl (committed) — nothing to set here.
 
 # Role + scope for the SP. Contributor at subscription scope is typical for
 # these patterns; tighten to a resource group if your governance requires it.
@@ -106,10 +105,6 @@ gh api -X PUT "repos/${REPO}/environments/${GH_ENVIRONMENT}" >/dev/null 2>&1 || 
 gh secret set ARM_CLIENT_ID       --env "${GH_ENVIRONMENT}" --repo "${REPO}" --body "${CLIENT_ID}"
 gh secret set ARM_TENANT_ID       --env "${GH_ENVIRONMENT}" --repo "${REPO}" --body "${TENANT_ID}"
 gh secret set ARM_SUBSCRIPTION_ID --env "${GH_ENVIRONMENT}" --repo "${REPO}" --body "${SUBSCRIPTION_ID}"
-
-# Non-secret backend coordinates as environment variables.
-gh variable set TFSTATE_SA --env "${GH_ENVIRONMENT}" --repo "${REPO}" --body "${TFSTATE_SA}"
-gh variable set TFSTATE_RG --env "${GH_ENVIRONMENT}" --repo "${REPO}" --body "${TFSTATE_RG}"
 
 echo
 echo ">> Done. Still TODO by hand (require values that only exist later):"

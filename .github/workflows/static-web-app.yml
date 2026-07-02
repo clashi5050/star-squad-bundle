@@ -117,20 +117,16 @@ jobs:
         run: git config --global url."https://oauth2:${{ secrets.GH_PAT }}@github.com".insteadOf "https://github.com"
 
       # Initializes Terraform: downloads providers/modules and connects to the
-      # Azure backend for state. Backend values are passed here (partial backend
-      # config) so main.tf stays static and per-env state keys stay unique.
+      # Azure backend for state. Storage account/container/resource group come
+      # from the committed backend.hcl; only the per-env state key is passed here.
       - name: Terraform Init
         id: init
         env:
-          TFSTATE_SA: ${{ vars.TFSTATE_SA }}
-          TFSTATE_RG: ${{ vars.TFSTATE_RG }}
           ENVIRONMENT: ${{ fromJson(steps.set-matrix.outputs.matrix).environment }}
           SHORT_LOC: ${{ fromJson(steps.set-matrix.outputs.matrix).short_loc }}
         run: |
           terraform init \
-            -backend-config="resource_group_name=${TFSTATE_RG}" \
-            -backend-config="storage_account_name=${TFSTATE_SA}" \
-            -backend-config="container_name=tfstate" \
+            -backend-config=backend.hcl \
             -backend-config="key=${ENVIRONMENT}-${SHORT_LOC}-static-web-app.tfstate"
 
       # Generates an execution plan showing what resources will be created, changed, or destroyed (does not apply anything)

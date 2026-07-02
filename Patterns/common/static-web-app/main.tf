@@ -18,11 +18,10 @@ terraform {
     }
   }
 
-  # Partial backend config — concrete values supplied at init time:
-  #   terraform init \
-  #     -backend-config="resource_group_name=$TFSTATE_RG" \
-  #     -backend-config="storage_account_name=$TFSTATE_SA" \
-  #     -backend-config="container_name=tfstate" \
+  # Partial backend config. Storage account/container/resource group are fixed
+  # in backend.hcl (committed) so they don't need to be re-supplied each time.
+  # Only `key` still varies per environment/region and is passed at init time:
+  #   terraform init -backend-config=backend.hcl \
   #     -backend-config="key=${environment}-${short_loc}-static-web-app.tfstate"
   backend "azurerm" {
     use_oidc = true

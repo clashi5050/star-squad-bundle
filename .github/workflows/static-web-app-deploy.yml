@@ -19,7 +19,7 @@ jobs:
     # Targets the same GitHub environment the SWA was provisioned into, so
     # this job can see the environment-scoped AZURE_STATIC_WEB_APPS_API_TOKEN
     # secret set by scripts/set-swa-token.sh.
-    environment: dev
+    environment: main
     permissions:
       contents: read
 

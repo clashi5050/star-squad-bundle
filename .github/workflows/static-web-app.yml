@@ -11,9 +11,9 @@ on:
         required: true
         default: 'use2'
       environment:
-        description: 'Environment (sndx, dev, test, np, stg, uat, prod)'
+        description: 'Environment (sndx, dev, test, np, stg, uat, prod, main)'
         required: true
-        default: 'dev'
+        default: 'main'
       destroy_after:
         description: 'Do you want to destroy the resource after creation.(true/false)'
         required: false
@@ -34,11 +34,15 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     # Environment variables available to all steps in this job
+    # NOTE: ARM_CLIENT_ID/TENANT_ID/SUBSCRIPTION_ID are GitHub *variables*, not
+    # secrets. Under OIDC there's no shared credential behind them — knowing
+    # these IDs grants nothing without a matching federated-credential subject
+    # — so they're safe to expose in this public repo's logs/config.
     env:
       ARM_USE_OIDC: "true"
-      TF_VAR_arm_client_id: ${{secrets.ARM_CLIENT_ID}}
-      TF_VAR_arm_subscription_id: ${{secrets.ARM_SUBSCRIPTION_ID}}
-      TF_VAR_arm_tenant_id: ${{secrets.ARM_TENANT_ID}}
+      TF_VAR_arm_client_id: ${{vars.ARM_CLIENT_ID}}
+      TF_VAR_arm_subscription_id: ${{vars.ARM_SUBSCRIPTION_ID}}
+      TF_VAR_arm_tenant_id: ${{vars.ARM_TENANT_ID}}
       TF_WORKING_DIR: './Patterns/common/static-web-app'
       #TF_LOG: DEBUG
     # Sets the default working directory for all run steps so paths are relative to the Terraform config
@@ -51,9 +55,9 @@ jobs:
       - name: 'Login to Azure with OIDC federated credentials'
         uses: azure/login@a457da9ea143d694b1b9c7c869ebb04ebe844ef5
         with:
-          client-id: ${{ secrets.ARM_CLIENT_ID }}
-          tenant-id: ${{ secrets.ARM_TENANT_ID }}
-          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          client-id: ${{ vars.ARM_CLIENT_ID }}
+          tenant-id: ${{ vars.ARM_TENANT_ID }}
+          subscription-id: ${{ vars.ARM_SUBSCRIPTION_ID }}
 
       # Pulls the repo code onto the runner so subsequent steps can access the Terraform files
       - name: Checkout

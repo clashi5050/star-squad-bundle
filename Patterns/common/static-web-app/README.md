@@ -13,7 +13,7 @@ apps/star-squad/                  # App content only (index.html + SWA config)
 .github/workflows/
   static-web-app.yml              # Provisions the SWA (manual, workflow_dispatch)
   static-web-app-deploy.yml       # Deploys app content (on push to apps/star-squad/**)
-.github/inputs/sndx/use2/
+.github/inputs/main/use2/
   staticwebapp.json               # Environment/region matrix input
 ```
 
@@ -33,15 +33,28 @@ Terraform provisions the **resource**; content is deployed separately with a
 
 ## Required GitHub configuration
 
-Secrets (per environment):
+This repo is **public**, so identifiers that carry no access on their own are
+kept as GitHub **variables** (visible in the UI/logs); only things that are
+themselves a usable credential are **secrets**.
 
-| Secret | Purpose |
+Variables (per environment, e.g. `main`) — set by `setup-oidc-and-secrets.sh`:
+
+| Variable | Purpose |
 |---|---|
 | `ARM_CLIENT_ID` | OIDC app registration (client) ID |
 | `ARM_SUBSCRIPTION_ID` | Target subscription |
 | `ARM_TENANT_ID` | Azure AD tenant |
+
+These are safe as plain variables under OIDC: there's no password/secret
+behind them, and minting a token still requires a matching federated-credential
+subject on the Azure AD app (scoped to this exact repo + environment).
+
+Secrets (per environment):
+
+| Secret | Purpose |
+|---|---|
 | `GH_PAT` | Read access to the private `iac-modules` repo (module downloads) |
-| `AZURE_STATIC_WEB_APPS_API_TOKEN` | SWA content deployment token (set after step 1) |
+| `AZURE_STATIC_WEB_APPS_API_TOKEN` | SWA content deployment token (set after step 1, via `set-swa-token.sh`) |
 
 The remote state storage account/container/resource group are fixed in the
 committed [`backend.hcl`](backend.hcl) — no GitHub variables needed for these.
@@ -69,13 +82,13 @@ Create a **fine-grained** PAT scoped to exactly one repo:
 6. Generate, copy the token, then store it as the environment secret:
 
    ```bash
-   gh secret set GH_PAT --env sndx --repo clashi5050/star-squad-bundle --body '<pat>'
+   gh secret set GH_PAT --env main --repo clashi5050/star-squad-bundle --body '<pat>'
    ```
 
 Notes:
-- Set it at the **environment** level (`sndx`, etc.) so it lines up with the
+- Set it at the **environment** level (`main`, etc.) so it lines up with the
   workflow's `environment: ${{ github.event.inputs.environment }}`, exactly like
-  the `ARM_*` secrets set by `setup-oidc-and-secrets.sh`.
+  the `ARM_*` variables set by `setup-oidc-and-secrets.sh`.
 - If `iac-modules` lives under a different owner than `star-squad-bundle`, create the
   token under that owner; fine-grained PATs are scoped per resource owner.
 

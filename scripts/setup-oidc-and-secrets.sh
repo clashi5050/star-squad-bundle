@@ -21,7 +21,7 @@ GITHUB_REPO="star-squad-bundle"
 APP_NAME="gha-oidc-${GITHUB_REPO}-static-web-app"
 
 # GitHub environment these credentials are scoped to (matches workflow input).
-GH_ENVIRONMENT="dev"
+GH_ENVIRONMENT="main"
 
 # Remote-state backend coordinates are fixed in
 # Patterns/common/static-web-app/backend.hcl (committed) — nothing to set here.
@@ -93,18 +93,22 @@ create_fic "gha-env-${GH_ENVIRONMENT}" \
 create_fic "gha-branch-main" \
   "repo:${GITHUB_ORG}/${GITHUB_REPO}:ref:refs/heads/main"
 
-# --- 5. GitHub secrets + vars -------------------------------------------------
-# Secrets/vars set at the ENVIRONMENT level so they line up with the workflow's
+# --- 5. GitHub vars (+ secrets) ------------------------------------------------
+# Set at the ENVIRONMENT level so they line up with the workflow's
 # `environment: ${{ github.event.inputs.environment }}`.
-echo ">> Setting GitHub environment secrets/vars on ${GITHUB_ORG}/${GITHUB_REPO} (${GH_ENVIRONMENT})..."
+# ARM_CLIENT_ID/TENANT_ID/SUBSCRIPTION_ID are *variables*, not secrets: under
+# OIDC there's no shared credential behind them, so they're safe to expose in
+# a public repo (they grant nothing without a matching federated-credential
+# subject on the Azure AD app).
+echo ">> Setting GitHub environment vars on ${GITHUB_ORG}/${GITHUB_REPO} (${GH_ENVIRONMENT})..."
 REPO="${GITHUB_ORG}/${GITHUB_REPO}"
 
 # Ensure the environment exists (gh has no direct create; the API call is safe).
 gh api -X PUT "repos/${REPO}/environments/${GH_ENVIRONMENT}" >/dev/null 2>&1 || true
 
-gh secret set ARM_CLIENT_ID       --env "${GH_ENVIRONMENT}" --repo "${REPO}" --body "${CLIENT_ID}"
-gh secret set ARM_TENANT_ID       --env "${GH_ENVIRONMENT}" --repo "${REPO}" --body "${TENANT_ID}"
-gh secret set ARM_SUBSCRIPTION_ID --env "${GH_ENVIRONMENT}" --repo "${REPO}" --body "${SUBSCRIPTION_ID}"
+gh variable set ARM_CLIENT_ID       --env "${GH_ENVIRONMENT}" --repo "${REPO}" --body "${CLIENT_ID}"
+gh variable set ARM_TENANT_ID       --env "${GH_ENVIRONMENT}" --repo "${REPO}" --body "${TENANT_ID}"
+gh variable set ARM_SUBSCRIPTION_ID --env "${GH_ENVIRONMENT}" --repo "${REPO}" --body "${SUBSCRIPTION_ID}"
 
 echo
 echo ">> Done. Still TODO by hand (require values that only exist later):"

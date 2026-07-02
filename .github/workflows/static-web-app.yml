@@ -13,7 +13,7 @@ on:
       environment:
         description: 'Environment (sndx, dev, test, np, stg, uat, prod)'
         required: true
-        default: 'sndx'
+        default: 'dev'
       destroy_after:
         description: 'Do you want to destroy the resource after creation.(true/false)'
         required: false

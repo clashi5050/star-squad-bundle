@@ -18,8 +18,8 @@ set -euo pipefail
 
 # ------------------------------- CONFIG --------------------------------------
 GITHUB_ORG="clashi5050"
-GITHUB_REPO="star-squad-bundle"
-GH_ENVIRONMENT="dev"
+GITHUB_REPO="iac-patterns"
+GH_ENVIRONMENT="sndx"
 
 # Must match the naming produced by main.tf:
 #   rg-<company_loc>-<app>-<type>-<environment>-<short_loc>
@@ -27,7 +27,7 @@ GH_ENVIRONMENT="dev"
 COMPANY_LOC="use2"
 APP="starsquad"
 TYPE="swa"
-ENVIRONMENT="dev"
+ENVIRONMENT="sndx"
 SHORT_LOC="use2"
 # -----------------------------------------------------------------------------
 

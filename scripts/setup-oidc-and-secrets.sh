@@ -17,14 +17,15 @@ set -euo pipefail
 
 # ------------------------------- CONFIG --------------------------------------
 GITHUB_ORG="clashi5050"
-GITHUB_REPO="star-squad-bundle"
+GITHUB_REPO="iac-patterns"
 APP_NAME="gha-oidc-${GITHUB_REPO}-static-web-app"
 
 # GitHub environment these credentials are scoped to (matches workflow input).
-GH_ENVIRONMENT="dev"
+GH_ENVIRONMENT="sndx"
 
-# Remote-state backend coordinates are fixed in
-# Patterns/common/static-web-app/backend.hcl (committed) — nothing to set here.
+# Remote-state backend (must already exist). Matches vars.TFSTATE_* in the repo.
+TFSTATE_RG="rg-tfstate"
+TFSTATE_SA="sttfstateexample"   # <-- set to your real state storage account
 
 # Role + scope for the SP. Contributor at subscription scope is typical for
 # these patterns; tighten to a resource group if your governance requires it.
@@ -67,7 +68,7 @@ az role assignment create \
 # --- 4. OIDC federated credentials -------------------------------------------
 # One credential per GitHub "subject". We add:
 #   - the environment subject (used by workflow_dispatch with environment: sndx)
-#   - the main-branch subject (used by the push-triggered deploy workflow)
+#   - the dev-branch subject (used by the push-triggered deploy workflow)
 echo ">> Creating federated credentials..."
 
 create_fic () {
@@ -90,8 +91,8 @@ create_fic () {
 
 create_fic "gha-env-${GH_ENVIRONMENT}" \
   "repo:${GITHUB_ORG}/${GITHUB_REPO}:environment:${GH_ENVIRONMENT}"
-create_fic "gha-branch-main" \
-  "repo:${GITHUB_ORG}/${GITHUB_REPO}:ref:refs/heads/main"
+create_fic "gha-branch-dev" \
+  "repo:${GITHUB_ORG}/${GITHUB_REPO}:ref:refs/heads/dev"
 
 # --- 5. GitHub secrets + vars -------------------------------------------------
 # Secrets/vars set at the ENVIRONMENT level so they line up with the workflow's
@@ -105,6 +106,10 @@ gh api -X PUT "repos/${REPO}/environments/${GH_ENVIRONMENT}" >/dev/null 2>&1 || 
 gh secret set ARM_CLIENT_ID       --env "${GH_ENVIRONMENT}" --repo "${REPO}" --body "${CLIENT_ID}"
 gh secret set ARM_TENANT_ID       --env "${GH_ENVIRONMENT}" --repo "${REPO}" --body "${TENANT_ID}"
 gh secret set ARM_SUBSCRIPTION_ID --env "${GH_ENVIRONMENT}" --repo "${REPO}" --body "${SUBSCRIPTION_ID}"
+
+# Non-secret backend coordinates as environment variables.
+gh variable set TFSTATE_SA --env "${GH_ENVIRONMENT}" --repo "${REPO}" --body "${TFSTATE_SA}"
+gh variable set TFSTATE_RG --env "${GH_ENVIRONMENT}" --repo "${REPO}" --body "${TFSTATE_RG}"
 
 echo
 echo ">> Done. Still TODO by hand (require values that only exist later):"

@@ -26,3 +26,13 @@ output "api_key" {
   value       = azurerm_static_web_app.app.api_key
   sensitive   = true
 }
+
+output "cosmos_account_name" {
+  description = "Cosmos DB account backing cross-device sync."
+  value       = azurerm_cosmosdb_account.db.name
+}
+
+output "cosmos_endpoint" {
+  description = "Cosmos DB endpoint used by the managed Functions API."
+  value       = azurerm_cosmosdb_account.db.endpoint
+}

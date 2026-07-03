@@ -43,8 +43,12 @@ Secrets (per environment):
 | `GH_PAT` | Read access to the private `iac-modules` repo (module downloads) |
 | `AZURE_STATIC_WEB_APPS_API_TOKEN` | SWA content deployment token (set after step 1) |
 
-The remote state storage account/container/resource group are fixed in the
-committed [`backend.hcl`](backend.hcl) — no GitHub variables needed for these.
+Variables:
+
+| Variable | Purpose |
+|---|---|
+| `TFSTATE_SA` | Storage account holding remote Terraform state |
+| `TFSTATE_RG` | Resource group of the state storage account |
 
 ## Creating the `GH_PAT` (fine-grained)
 
@@ -69,15 +73,77 @@ Create a **fine-grained** PAT scoped to exactly one repo:
 6. Generate, copy the token, then store it as the environment secret:
 
    ```bash
-   gh secret set GH_PAT --env sndx --repo clashi5050/star-squad-bundle --body '<pat>'
+   gh secret set GH_PAT --env sndx --repo clashi5050/iac-patterns --body '<pat>'
    ```
 
 Notes:
 - Set it at the **environment** level (`sndx`, etc.) so it lines up with the
   workflow's `environment: ${{ github.event.inputs.environment }}`, exactly like
   the `ARM_*` secrets set by `setup-oidc-and-secrets.sh`.
-- If `iac-modules` lives under a different owner than `star-squad-bundle`, create the
+- If `iac-modules` lives under a different owner than `iac-patterns`, create the
   token under that owner; fine-grained PATs are scoped per resource owner.
+
+## Accounts + cross-device sync (added)
+
+The pattern now optionally provisions a backend so data follows a signed-in user
+across devices, instead of living only in the browser's `localStorage`.
+
+New resources (in `main.tf`):
+
+- **Static Web App upgraded to `Standard`** (`var.swa_sku`, default `Standard`) —
+  required for custom authentication and the managed API. This was `Free` before.
+- **Azure Cosmos DB (serverless, SQL API)** — `cosmos-<name_prefix>`, with a
+  `starsquad` database and a `families` container partitioned by `/userId`.
+  Serverless means pay-per-request (pennies at this scale), no provisioned RU/s.
+- **SWA app settings** wired to the Cosmos endpoint/key/db/container so the API
+  can reach it without any secrets in source control.
+
+New app code:
+
+```
+api/                              # SWA managed Functions API (Node.js)
+  GetData/   -> GET  /api/data    # returns the signed-in user's saved state
+  SaveData/  -> POST /api/data    # upserts it (keyed by x-ms-client-principal)
+  shared/store.js                 # Cosmos client + auth-header decode
+apps/star-squad/staticwebapp.config.json  # Entra External ID OIDC + /api locked to authenticated
+scripts/setup-auth.sh             # one-time: app registration, secret, SWA settings
+```
+
+### Auth: email sign-in via Microsoft Entra External ID
+
+Sign-in uses **Entra External ID** (customer identity/CIAM) as a custom OpenID
+Connect provider. Users **sign up with an email + password**, verify by email,
+and can reset their password; MFA is available. Static Web Apps hosts the
+sign-in pages and injects the user into the API via the `x-ms-client-principal`
+header — the app never handles passwords.
+
+Config lives in `staticwebapp.config.json`; the client id/secret are read from
+SWA app settings **`AAD_CLIENT_ID`** / **`AAD_CLIENT_SECRET`**, set by
+`scripts/setup-auth.sh` (not through Terraform, so the OIDC secret stays out of
+state). The tenant subdomain is set once via `EXTERNAL_ID_TENANT` in
+`scripts/setup-auth.sh` (currently `cjsazurelab`), and the script patches
+`wellKnownOpenIdConfiguration` in that config to match when it runs.
+
+### Behaviour
+
+- **Guest mode is unchanged.** With no sign-in, everything works on
+  `localStorage` exactly as before.
+- **Signed in:** on load the app pulls the cloud copy from `/api/data`; every
+  change is debounced and pushed back via `POST /api/data`. `localStorage` stays
+  as an offline cache.
+
+### Bootstrap order
+
+1. `terraform apply` (provisions Standard SWA + Cosmos; sets Cosmos app settings).
+2. `scripts/setup-oidc-and-secrets.sh` (Azure OIDC + `ARM_*` / `TFSTATE_*`).
+3. `scripts/setup-auth.sh` (Entra External ID app registration + SWA auth settings).
+4. `scripts/set-swa-token.sh` then push `apps/star-squad/**` to deploy app + API.
+
+> On networking: the browser -> `/api` hop is public by design (kids open the
+> site from anywhere) and is secured by HTTPS + the sign-in token + the
+> `authenticated` role on `/api/*`. To keep the **API -> Cosmos** hop on Azure's
+> backbone, add a Cosmos private endpoint + VNet-integrated backend (the "Tier B"
+> option) — not included here to keep the Free-to-Standard step small.
 
 ## Notes
 
@@ -92,14 +158,6 @@ Notes:
   `main.tf` here reads everything as Terraform variables. Only
   `nonsecret.auto.tfvars` is rendered from its template. This is intentional and
   more robust — consider back-porting it to the resource-group pattern.
-- **Remote state backend.** Storage account, container, and resource group are
-  fixed in the committed [`backend.hcl`](backend.hcl) (currently
-  `tfstatestoragelab2` / `tfstate` / `tfstatelab`). This storage account lives
-  in a *different* subscription (`cjsazurelab`) than the one resources are
-  deployed into (`arm_subscription_id`), so `backend.hcl` also pins an explicit
-  `subscription_id` — the deploy service principal needs `Storage Account
-  Contributor` on the `tfstatelab` resource group in that subscription for
-  backend init to read the storage account's keys. Only the state **key** —
-  `<environment>-<short_loc>-static-web-app.tfstate` — still varies per
-  deployment and is passed via `-backend-config` on `terraform init`, so it
-  never collides with other patterns in the same storage account.
+- **State key** is `<environment>-<short_loc>-static-web-app.tfstate`, passed via
+  `-backend-config` on `terraform init`, so it never collides with other
+  patterns in the same storage account.

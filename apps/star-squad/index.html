@@ -128,6 +128,9 @@
   .card .row .btn{flex:1;border-color:transparent;background:var(--sky);color:var(--ink)}
   .card .row .btn.ghost{background:transparent;border:2px solid rgba(255,255,255,.2);color:var(--cloud)}
   .lock{position:fixed;bottom:14px;right:14px;z-index:40;width:46px;height:46px;border-radius:50%;background:var(--panel);border:2px solid rgba(255,255,255,.15);color:#fff;font-size:20px;cursor:pointer}
+  .authbar{margin-top:8px;font-size:12px;min-height:16px}
+  .linkbtn{background:none;border:none;color:var(--sky);font-family:inherit;font-weight:800;cursor:pointer;font-size:12px;text-decoration:underline;padding:2px 4px}
+  .authbar .synced{opacity:.8;margin-right:6px}
 </style>
 </head>
 <body>
@@ -137,6 +140,7 @@
   <header>
     <div class="title">⭐ Star Squad ⭐</div>
     <div class="subtitle">Tap what you did. Earn stars. Win prizes!</div>
+    <div id="authbar" class="authbar"></div>
   </header>
 
   <div class="board" id="board"></div>
@@ -178,6 +182,7 @@
 <script>
 /* ---------- data ---------- */
 const DEFAULT = {
+  voice:true,
   kids:[
     {name:"Case", avatar:"🦁", points:0, goal:50},
     {name:"Carmen", avatar:"🐯", points:0, goal:50}
@@ -207,7 +212,7 @@ function load(){
   try{ const d = JSON.parse(localStorage.getItem("starSquad")); if(d&&d.kids) return d; }catch(e){}
   return JSON.parse(JSON.stringify(DEFAULT));
 }
-function save(){ try{localStorage.setItem("starSquad",JSON.stringify(S))}catch(e){} }
+function save(){ try{localStorage.setItem("starSquad",JSON.stringify(S))}catch(e){} pushRemote(); }
 
 /* ---------- render ---------- */
 function render(){
@@ -265,6 +270,7 @@ function doTask(i){
   k.points += S.tasks[i].val;
   celebrate(CHEERS[Math.floor(Math.random()*CHEERS.length)]);
   ding();
+  speakCheer(k.name);
   render();
 }
 function redeem(i){
@@ -273,6 +279,7 @@ function redeem(i){
   k.points -= p.cost;
   celebrate(p.emoji+" "+p.name.toUpperCase()+"!");
   ding(true);
+  speakPrize(p.name, k.name);
   render();
 }
 function resetDay(){
@@ -337,6 +344,32 @@ function ding(big){
   }catch(e){}
 }
 
+/* ---------- voice cheers ---------- */
+const SPEAK_LINES=["Great job, %s!","Awesome work, %s!","Way to go, %s!","You did it, %s!","Super star, %s!","High five, %s!","Nice one, %s!","So proud of you, %s!"];
+let _voice=null;
+function pickVoice(){
+  try{
+    const vs=speechSynthesis.getVoices()||[];
+    _voice = vs.find(v=>/^en(-|_)?US/i.test(v.lang)&&/female|zira|samantha|google us/i.test(v.name))
+          || vs.find(v=>/^en/i.test(v.lang)) || vs[0] || null;
+  }catch(e){}
+}
+function speak(text){
+  if(S.voice===false) return;
+  if(!("speechSynthesis" in window)) return;
+  try{
+    if(!_voice) pickVoice();
+    speechSynthesis.cancel();               // never let cheers stack up
+    const u=new SpeechSynthesisUtterance(text);
+    if(_voice) u.voice=_voice;
+    u.pitch=1.3; u.rate=1.02; u.volume=1;    // bright, upbeat, kid-friendly
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function speakCheer(name){ speak(SPEAK_LINES[Math.floor(Math.random()*SPEAK_LINES.length)].replace("%s", name)); }
+function speakPrize(prize,name){ speak(prize+" for "+name+"! Woo hoo!"); }
+if("speechSynthesis" in window){ try{ speechSynthesis.onvoiceschanged=pickVoice; pickVoice(); }catch(e){} }
+
 /* ---------- parent settings ---------- */
 function openParent(){
   const b=document.getElementById("parentBody");
@@ -348,14 +381,52 @@ function openParent(){
     <label>Kid ${i+1} star goal</label>
     <input id="kg${i}" type="number" value="${k.goal}">
   `).join("") +
-  `<label>Points per task</label>
-   <input id="tval" type="number" value="${S.tasks[0].val}">
+  `<label style="display:flex;align-items:center;gap:10px;margin-top:16px;font-size:15px;opacity:1;font-weight:800">
+     <input type="checkbox" id="voiceOn" ${S.voice!==false?'checked':''} style="width:20px;height:20px"> 🔊 Voice cheers
+   </label>
+   <hr style="border:none;border-top:2px solid rgba(255,255,255,.1);margin:20px 0 6px">
+   <label style="font-size:15px;opacity:1;font-weight:800">✅ Tasks</label>
+   <div id="taskEdit"></div>
+   <button class="btn" style="width:100%;margin-top:10px;border-color:var(--sky);color:var(--sky)" onclick="addTask()">➕ Add a Task</button>
    <hr style="border:none;border-top:2px solid rgba(255,255,255,.1);margin:20px 0 6px">
    <label style="font-size:15px;opacity:1;font-weight:800">🎁 Prizes</label>
    <div id="prizeEdit"></div>
    <button class="btn" style="width:100%;margin-top:10px;border-color:var(--mint);color:var(--mint)" onclick="addPrize()">➕ Add a Prize</button>`;
+  renderTaskEdit();
   renderPrizeEdit();
   document.getElementById("modal").classList.add("show");
+}
+// task colors offered in the editor (maps to the .c-* CSS classes)
+const COLOR_OPTS=[["c-sky","Blue"],["c-sun","Yellow"],["c-mint","Green"],["c-coral","Red"],["c-grape","Purple"],["c-orange","Orange"]];
+function renderTaskEdit(){
+  document.getElementById("taskEdit").innerHTML = S.tasks.map((t,i)=>`
+    <div style="display:flex;gap:6px;align-items:center;margin-top:8px">
+      <input id="te${i}" value="${esc(t.emoji)}" maxlength="4" style="width:50px;text-align:center;padding:8px 4px" placeholder="✅">
+      <input id="tl${i}" value="${esc(t.label)}" style="flex:1;min-width:0;padding:8px 10px" placeholder="Task name">
+      <input id="tv${i}" type="number" value="${t.val}" style="width:52px;padding:8px 6px" placeholder="⭐">
+      <select id="tc${i}" style="width:76px;padding:8px 4px;border-radius:12px;border:2px solid rgba(255,255,255,.15);background:var(--ink);color:var(--cloud);font-family:inherit">
+        ${COLOR_OPTS.map(([c,n])=>`<option value="${c}" ${t.color===c?'selected':''}>${n}</option>`).join("")}
+      </select>
+      <button class="btn" style="padding:8px 10px;border-color:var(--coral);color:var(--coral)" onclick="removeTask(${i})">🗑️</button>
+    </div>`).join("");
+}
+function readTaskEdit(){
+  S.tasks = S.tasks.map((t,i)=>({
+    emoji:(document.getElementById("te"+i)?.value||t.emoji).trim()||"✅",
+    label:(document.getElementById("tl"+i)?.value||t.label).trim()||"Task",
+    val:Math.max(1,parseInt(document.getElementById("tv"+i)?.value)||t.val),
+    color:document.getElementById("tc"+i)?.value||t.color
+  }));
+}
+function addTask(){
+  readTaskEdit();
+  S.tasks.push({emoji:"⭐", label:"New Task", val:5, color:COLOR_OPTS[S.tasks.length%COLOR_OPTS.length][0]});
+  renderTaskEdit();
+}
+function removeTask(i){
+  readTaskEdit();
+  S.tasks.splice(i,1);
+  renderTaskEdit();
 }
 function renderPrizeEdit(){
   document.getElementById("prizeEdit").innerHTML = S.prizes.map((p,i)=>`
@@ -385,14 +456,18 @@ function removePrize(i){
 }
 function closeParent(){document.getElementById("modal").classList.remove("show")}
 function saveParent(){
+  const prevTaskCount=S.tasks.length;
   S.kids.forEach((k,i)=>{
     k.name=document.getElementById("kn"+i).value||k.name;
     k.avatar=document.getElementById("ke"+i).value||k.avatar;
     k.goal=Math.max(5,parseInt(document.getElementById("kg"+i).value)||k.goal);
   });
-  const v=Math.max(1,parseInt(document.getElementById("tval").value)||5);
-  S.tasks.forEach(t=>t.val=v);
+  S.voice=document.getElementById("voiceOn").checked;
+  readTaskEdit();
   readPrizeEdit();
+  // If tasks were added/removed, clear today's checkmarks so a saved completion
+  // can't point at the wrong task once the list shifts.
+  if(S.tasks.length!==prevTaskCount){ S.kids.forEach(k=>k.done=[]); }
   closeParent();render();
 }
 
@@ -420,10 +495,69 @@ function restoreData(e){
   e.target.value="";
 }
 
+/* ---------- accounts + cloud sync (Azure Static Web Apps) ---------- */
+// Guest mode still works entirely on localStorage. When the user signs in with
+// their email (Entra External ID), we load their saved data from /api/data and
+// push changes back, keeping localStorage as an offline cache.
+const AUTH = { signedIn:false, user:null };
+
+async function checkAuth(){
+  try{
+    const r = await fetch("/.auth/me", { headers:{ "Accept":"application/json" } });
+    if(!r.ok) return;
+    const j = await r.json();
+    if(j && j.clientPrincipal){ AUTH.signedIn = true; AUTH.user = j.clientPrincipal; }
+  }catch(e){ /* offline or running locally without SWA auth -> stay in guest mode */ }
+}
+
+async function pullRemote(){
+  if(!AUTH.signedIn) return;
+  try{
+    const r = await fetch("/api/data", { headers:{ "Accept":"application/json" } });
+    if(!r.ok) return;
+    const j = await r.json();
+    if(j && j.data && j.data.kids){ S = j.data; save(); }   // adopt cloud copy
+  }catch(e){ /* keep local copy on failure */ }
+}
+
+let _pushT = null;
+function pushRemote(){
+  if(!AUTH.signedIn) return;
+  clearTimeout(_pushT);
+  _pushT = setTimeout(async ()=>{
+    try{
+      await fetch("/api/data", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify(S)
+      });
+    }catch(e){ /* will retry on next change */ }
+  }, 800);   // debounce rapid taps into one write
+}
+
+function signIn(){ location.href = "/.auth/login/entraExternalId?post_login_redirect_uri=" + encodeURIComponent(location.pathname); }
+function signOut(){ location.href = "/.auth/logout?post_logout_redirect_uri=" + encodeURIComponent(location.pathname); }
+
+function renderAuth(){
+  const el = document.getElementById("authbar");
+  if(!el) return;
+  if(AUTH.signedIn){
+    const who = esc(AUTH.user.userDetails || "your account");
+    el.innerHTML = `<span class="synced">\u2601\uFE0F Synced as ${who}</span><button class="linkbtn" onclick="signOut()">Sign out</button>`;
+  } else {
+    el.innerHTML = `<button class="linkbtn" onclick="signIn()">\uD83D\uDD10 Sign in to sync across devices</button>`;
+  }
+}
+
 /* stars bg */
 (function(){const d=document.getElementById("dots");let h="";for(let i=0;i<40;i++){h+=`<i style="left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*3}s"></i>`}d.innerHTML=h})();
 
-render();
+(async function init(){
+  await checkAuth();
+  renderAuth();
+  if(AUTH.signedIn){ await pullRemote(); }
+  render();
+})();
 </script>
 </body>
 </html>

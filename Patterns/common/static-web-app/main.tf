@@ -18,10 +18,11 @@ terraform {
     }
   }
 
-  # Partial backend config. Storage account/container/resource group are fixed
-  # in backend.hcl (committed) so they don't need to be re-supplied each time.
-  # Only `key` still varies per environment/region and is passed at init time:
-  #   terraform init -backend-config=backend.hcl \
+  # Partial backend config — concrete values supplied at init time:
+  #   terraform init \
+  #     -backend-config="resource_group_name=$TFSTATE_RG" \
+  #     -backend-config="storage_account_name=$TFSTATE_SA" \
+  #     -backend-config="container_name=tfstate" \
   #     -backend-config="key=${environment}-${short_loc}-static-web-app.tfstate"
   backend "azurerm" {
     use_oidc = true
@@ -75,8 +76,61 @@ resource "azurerm_static_web_app" "app" {
   # Override var.location via the JSON input if the region is not supported.
   location = var.location
 
-  sku_tier = "Free"
-  sku_size = "Free"
+  sku_tier = var.swa_sku
+  sku_size = var.swa_sku
+
+  # App settings consumed by the managed Functions API (see /api). The auth
+  # provider's client id/secret are set out-of-band by scripts/setup-auth.sh so
+  # the OIDC secret never passes through Terraform state.
+  app_settings = {
+    COSMOS_ENDPOINT  = azurerm_cosmosdb_account.db.endpoint
+    COSMOS_KEY       = azurerm_cosmosdb_account.db.primary_key
+    COSMOS_DATABASE  = azurerm_cosmosdb_sql_database.db.name
+    COSMOS_CONTAINER = azurerm_cosmosdb_sql_container.families.name
+  }
 
   tags = local.common_tags
+}
+
+# -----------------------------------------------------------------------------
+# Cosmos DB (serverless, SQL/NoSQL API) — cross-device app data store.
+# One document per family, partitioned by the authenticated user's id. Serverless
+# means you pay per request (pennies at this scale) with no provisioned RU/s.
+# -----------------------------------------------------------------------------
+resource "azurerm_cosmosdb_account" "db" {
+  name                = "cosmos-${local.name_prefix}"
+  resource_group_name = azurerm_resource_group.swa.name
+  location            = var.location
+  offer_type          = "Standard"
+  kind                = "GlobalDocumentDB"
+
+  capabilities {
+    name = "EnableServerless"
+  }
+
+  consistency_policy {
+    consistency_level = "Session"
+  }
+
+  geo_location {
+    location          = var.location
+    failover_priority = 0
+  }
+
+  tags = local.common_tags
+}
+
+resource "azurerm_cosmosdb_sql_database" "db" {
+  name                = var.cosmos_db_name
+  resource_group_name = azurerm_cosmosdb_account.db.resource_group_name
+  account_name        = azurerm_cosmosdb_account.db.name
+}
+
+resource "azurerm_cosmosdb_sql_container" "families" {
+  name                = var.cosmos_container_name
+  resource_group_name = azurerm_cosmosdb_account.db.resource_group_name
+  account_name        = azurerm_cosmosdb_account.db.name
+  database_name       = azurerm_cosmosdb_sql_database.db.name
+  partition_key_paths = ["/userId"]
+  # Serverless: do not set throughput.
 }

@@ -1,5 +1,7 @@
 # Static Web App Pattern — Star Squad
 
+Updated: 7/8/2026
+
 Provisions an Azure Static Web App (Free tier) in its own resource group using
 the same conventions as the `resource-group` pattern (OIDC auth, pinned action
 SHAs, JSON-input matrix, remote state). Unlike `resource-group`, `main.tf` here

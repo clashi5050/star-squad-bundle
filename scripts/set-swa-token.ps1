@@ -67,6 +67,9 @@ if (-not $ghPath) {
 }
 $env:Path = "$(Split-Path $ghPath -Parent);$env:Path"
 
+Write-Host ">> Setting active subscription to $AZURE_SUBSCRIPTION_ID..."
+az account set --subscription $AZURE_SUBSCRIPTION_ID
+
 Write-Host ">> Fetching deployment token for $SWA (rg: $RG)..."
 $token = az staticwebapp secrets list --name $SWA --resource-group $RG --query 'properties.apiKey' -o tsv 2>$null
 

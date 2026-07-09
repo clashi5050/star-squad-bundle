@@ -6,6 +6,8 @@ $GITHUB_ORG = 'clashi5050'
 $GITHUB_REPO = 'star-squad-bundle'
 $GH_ENVIRONMENT = 'dev'
 
+$AZURE_SUBSCRIPTION_ID = '119e0880-44c4-463f-84ab-185efffe44a9'
+
 $COMPANY_LOC = 'use2'
 $APP = 'starsquad'
 $TYPE = 'swa'

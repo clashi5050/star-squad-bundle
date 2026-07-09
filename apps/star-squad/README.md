@@ -14,12 +14,21 @@ between devices.
 - **Task grid** — tap an emoji tile (brush teeth, get dressed, tidy toys,
   etc.) to mark it done for the day and award points; each task can only be
   completed once per day per kid.
+- **Growing pet** — each kid picks a pet (puppy, kitten, butterfly, chick,
+  avocado, or tree) that visibly grows through its stages as they earn
+  points toward their goal.
+- **Bank** — kids can tap the bank icon on their card to stash their current
+  points; banked points still count toward prizes but are kept separate
+  from the in-progress total shown on the goal bar.
 - **Prize shop** — a horizontal row of redeemable prizes that light up once a
-  kid has enough points; redeeming deducts the cost and triggers a
-  celebration.
+  kid has enough points (spending from points first, then the bank);
+  redeeming deducts the cost and triggers a celebration.
 - **Celebrations** — confetti (canvas-based), a random cheer message, and a
   short WebAudio chime play whenever a task is completed or a prize is
   redeemed.
+- **Tweaks panel** (🎛️ icon) — pick a color mood (Peach Cozy, Ocean Calm,
+  Berry Pop), an energy level (Playful or Chill, which calms the
+  animations), and celebration style (Big or Quiet).
 - **Grown-Up Settings** (lock icon) — a parent-only panel to rename/re-emoji
   each kid, change their star goal, adjust points-per-task, and add/edit/
   remove prizes.
@@ -30,7 +39,23 @@ between devices.
   progress isn't lost if the browser's local storage is cleared.
 
 Everything — layout, styling, and logic — lives in `index.html`; there's no
-build step and nothing to install.
+build step and nothing to install. A small revision tag (e.g. `rev 5 ·
+2026-07-09`) is shown under the title and bumped in-file (the `REV` /
+`REV_DATE` constants) with each shipped update.
+
+## Changelog
+
+**Rev 5 — 2026-07-09**
+- Added a growable pet for each kid to choose from.
+- Reworked the color palette to a calmer, more pastel look (plus alternate
+  Ocean Calm / Berry Pop themes via the Tweaks panel).
+- Added the bank option for saving up points.
+- Added the in-app revision tag.
+- Fixed a stored-XSS hole in `esc()`: it escaped `<`, `>`, and `&` but not
+  quote characters, so a kid name, task, or prize field (including one
+  loaded via **Restore**) containing a `"` could break out of an `value="..."`
+  attribute in the Grown-Up Settings modal and inject a live event handler.
+  `esc()` now escapes `"` and `'` as well.
 
 ## Privacy note
 

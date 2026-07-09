@@ -1,9 +1,0 @@
-{
-  "name": "star-squad-api",
-  "version": "1.0.0",
-  "description": "Managed Functions API for Star Squad: per-user data sync backed by Cosmos DB.",
-  "main": "GetData/index.js",
-  "dependencies": {
-    "@azure/cosmos": "^4.2.0"
-  }
-}

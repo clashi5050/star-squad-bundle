@@ -79,6 +79,9 @@ if ([string]::IsNullOrWhiteSpace($token)) {
 
 Write-Host ">> Storing AZURE_STATIC_WEB_APPS_API_TOKEN on $REPO ($GH_ENVIRONMENT)..."
 gh secret set AZURE_STATIC_WEB_APPS_API_TOKEN --env $GH_ENVIRONMENT --repo $REPO --body $token | Out-Null
+if ($LASTEXITCODE -ne 0) {
+    throw "gh secret set failed (exit code $LASTEXITCODE). Run 'gh auth login' and retry."
+}
 
 Write-Host '>> Done. Push a change under apps/star-squad/ (or run the deploy workflow manually) and the app will publish to the SWA''s default hostname:'
 $hostname = az staticwebapp show --name $SWA --resource-group $RG --query 'defaultHostname' -o tsv

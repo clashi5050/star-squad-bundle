@@ -28,15 +28,24 @@
     --lilac:#c9b6e6;
     --butter:#ffd98a;
     --line:#f0e2d8;
+    --glow1:#fff5ec;
+    --glow2:#fbe4ec;
+    --tile-peach:#ffcdbb;
+    --tile-rose:#f9c1cf;
+    --tile-mint:#bfe6d0;
+    --tile-sky:#c4ddf1;
+    --tile-lilac:#ddccf0;
+    --tile-butter:#ffe6ad;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
   html,body{height:100%}
   body{
     font-family:"Quicksand","Trebuchet MS",system-ui,sans-serif;
     background:
-      radial-gradient(90% 60% at 15% 0%, #fff5ec 0%, transparent 60%),
-      radial-gradient(80% 60% at 100% 10%, #fbe4ec 0%, transparent 55%),
+      radial-gradient(90% 60% at 15% 0%, var(--glow1) 0%, transparent 60%),
+      radial-gradient(80% 60% at 100% 10%, var(--glow2) 0%, transparent 55%),
       var(--bg);
+    transition:background-color .4s;
     color:var(--ink);
     overflow-x:hidden;
     -webkit-font-smoothing:antialiased;
@@ -54,6 +63,7 @@
   }
   .title .s{color:var(--star)}
   .subtitle{font-size:14px;color:var(--ink-soft);margin-top:2px;font-weight:600}
+  .revtag{font-size:10.5px;color:var(--ink-soft);opacity:.6;margin-top:4px;font-weight:600;letter-spacing:.3px}
 
   /* scoreboard */
   .board{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
@@ -74,7 +84,11 @@
   .kid .barwrap{height:14px;background:var(--bg2);border-radius:99px;margin-top:12px;overflow:hidden}
   .kid .bar{height:100%;width:0;border-radius:99px;transition:width .6s cubic-bezier(.2,.9,.3,1)}
   .kid .goaltxt{font-size:11.5px;color:var(--ink-soft);margin-top:7px;font-weight:600}
-  .kid .petzone{height:80px;display:flex;align-items:flex-end;justify-content:center;margin-top:8px}
+  .kid .bank{position:absolute;top:10px;left:12px;background:var(--panel-soft);border:2px solid var(--butter);border-radius:99px;padding:4px 10px;font-family:"Baloo 2",inherit;font-size:11.5px;font-weight:800;color:#8a6a2f;cursor:pointer;display:flex;align-items:center;gap:3px;z-index:2}
+  .kid .bank:active{transform:scale(.94)}
+  .kid .bank.empty{opacity:.55;cursor:default}
+  .kid .selectzone{cursor:pointer}
+  .kid .petzone{height:66px;display:flex;align-items:flex-end;justify-content:center;margin-top:14px;padding-top:10px;border-top:2px solid var(--line)}
   .kid .pet{line-height:1;filter:drop-shadow(0 4px 4px rgba(0,0,0,.15));transition:font-size .6s cubic-bezier(.2,.9,.3,1);cursor:pointer;animation:petIdle 2.8s ease-in-out infinite;transform-origin:bottom center}
   .kid .pet:active{transform:scale(.9)}
   .kid .petstage{font-size:11px;color:var(--ink-soft);font-weight:700;margin-top:4px}
@@ -104,8 +118,18 @@
   .task.done{filter:saturate(.55) brightness(.99)}
   .task.done::after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:56px;color:#fff;text-shadow:0 3px 6px rgba(120,90,70,.35);animation:pop .45s}
   @keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
-  .c-peach{background:#ffcdbb} .c-rose{background:#f9c1cf} .c-mint{background:#bfe6d0}
-  .c-sky{background:#c4ddf1} .c-lilac{background:#ddccf0} .c-butter{background:#ffe6ad}
+  .c-peach{background:var(--tile-peach)} .c-rose{background:var(--tile-rose)} .c-mint{background:var(--tile-mint)}
+  .c-sky{background:var(--tile-sky)} .c-lilac{background:var(--tile-lilac)} .c-butter{background:var(--tile-butter)}
+
+  /* chill vibe: calmer motion + softer shapes */
+  body.chill .kid{border-radius:18px;transition:border-color .2s,box-shadow .2s}
+  body.chill .kid.active{transform:none;box-shadow:0 8px 20px rgba(180,120,90,.10)}
+  body.chill .kid.winning .lead{animation:none}
+  body.chill .pet{animation:none}
+  body.chill .task{border-radius:18px}
+  body.chill .task:active{transform:none;box-shadow:0 6px 14px rgba(180,120,90,.14)}
+  body.chill .prize.ready{animation:none}
+  body.chill .clouds i{animation-duration:52s}
 
   /* prize row */
   .prizebar{margin-top:22px;background:var(--panel);border-radius:26px;padding:18px;box-shadow:0 8px 20px rgba(180,120,90,.10);border:3px solid var(--line)}
@@ -151,6 +175,20 @@
   .card .row .btn.ghost{background:var(--panel);border:2px solid var(--line);color:var(--ink)}
   .miniadd{width:100%;margin-top:12px;border-color:var(--mint);color:#2f6a4d;background:var(--panel)}
   .lock{position:fixed;bottom:16px;right:16px;z-index:40;width:50px;height:50px;border-radius:50%;background:var(--panel);border:2px solid var(--line);color:var(--ink);font-size:22px;cursor:pointer;box-shadow:0 6px 16px rgba(180,120,90,.2)}
+  .tweaksbtn{position:fixed;bottom:16px;left:16px;z-index:40;width:50px;height:50px;border-radius:50%;background:var(--panel);border:2px solid var(--line);color:var(--ink);font-size:22px;cursor:pointer;box-shadow:0 6px 16px rgba(180,120,90,.2)}
+  .tweaksbtn:active{transform:scale(.94)}
+  .swatchrow{display:flex;gap:10px;margin-top:8px}
+  .swatch{flex:1;border-radius:16px;border:2px solid var(--line);padding:10px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--panel-soft);font-family:inherit}
+  .swatch .dots{display:flex;gap:3px}
+  .swatch .dot{width:14px;height:14px;border-radius:50%}
+  .swatch .sl{font-family:"Baloo 2",inherit;font-size:11px;font-weight:700;color:var(--ink)}
+  .swatch.sel{border-color:var(--peach);box-shadow:0 0 0 3px rgba(255,185,163,.3);background:#fff}
+  .seg{display:flex;gap:8px;margin-top:8px}
+  .seg button{flex:1;padding:10px 8px;border-radius:14px;border:2px solid var(--line);background:var(--panel-soft);font-family:"Baloo 2",inherit;font-weight:700;font-size:12.5px;color:var(--ink);cursor:pointer}
+  .seg button.sel{border-color:var(--peach);background:#fff;box-shadow:0 0 0 3px rgba(255,185,163,.3)}
+  .seg button:active{transform:scale(.96)}
+  .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-16px);background:var(--panel);border:2px solid var(--mint);border-radius:99px;padding:9px 20px;font-family:"Baloo 2",inherit;font-weight:800;font-size:14px;color:#2f6a4d;box-shadow:0 8px 20px rgba(180,120,90,.15);z-index:55;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   @keyframes petIdle{0%,100%{transform:translateY(0) rotate(-2deg) scale(1)}50%{transform:translateY(-5px) rotate(2deg) scale(1.03)}}
   @keyframes petPop{0%{transform:translateY(0) scale(1)}35%{transform:translateY(-14px) scale(1.35) rotate(-6deg)}70%{transform:translateY(2px) scale(.94)}100%{transform:translateY(0) scale(1)}}
   @keyframes petShake{0%,100%{transform:translateX(0) rotate(0)}20%{transform:translateX(-6px) rotate(-7deg)}40%{transform:translateX(5px) rotate(6deg)}60%{transform:translateX(-4px) rotate(-4deg)}80%{transform:translateX(3px) rotate(3deg)}}
@@ -163,6 +201,7 @@
   <header>
     <div class="title"><span class="s">⭐</span> Star Squad <span class="s">⭐</span></div>
     <div class="subtitle">Tap what you did. Earn stars. Win prizes!</div>
+    <div class="revtag" id="revtag"></div>
   </header>
 
   <div class="board" id="board"></div>
@@ -185,6 +224,7 @@
 </div>
 
 <button class="lock" onclick="openParent()" title="Grown-up settings">⚙️</button>
+<button class="tweaksbtn" onclick="openTweaks()" title="Tweaks">🎛️</button>
 
 <div class="cheer" id="cheer"><div class="msg" id="cheerMsg">YAY!</div></div>
 <canvas id="confetti"></canvas>
@@ -212,7 +252,28 @@
   </div>
 </div>
 
+<!-- Tweaks modal -->
+<div class="modal" id="tweaksModal">
+  <div class="card" style="max-width:360px">
+    <h3>Tweaks 🎛️</h3>
+    <div class="hint">Change the whole feel of Star Squad.</div>
+    <label>Color Mood</label>
+    <div class="swatchrow" id="themeRow"></div>
+    <label>Energy</label>
+    <div class="seg" id="vibeRow"></div>
+    <label>Celebrations</label>
+    <div class="seg" id="celebRow"></div>
+    <div class="row"><button class="btn ghost" onclick="closeTweaks()">Done</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
+/* ---------- version ---------- */
+const REV = 5; // bump this on every shipped update
+const REV_DATE = "2026-07-09";
+
 /* ---------- data ---------- */
 const TILE = ["c-peach","c-butter","c-mint","c-rose","c-lilac","c-sky"];
 const PETS = [
@@ -230,18 +291,55 @@ function petFor(k,i,ratio){
   const size = Math.round(30 + Math.min(1,ratio)*46);
   return {emoji:p.stages[si], size, label:petLabel(ratio)};
 }
-const BAR_GRADS = [
-  "linear-gradient(90deg,#ffb9a3,#ffd98a)",
-  "linear-gradient(90deg,#f7a1b4,#c9b6e6)",
-  "linear-gradient(90deg,#9bd6b8,#a8cdea)",
-  "linear-gradient(90deg,#a8cdea,#9bd6b8)",
-  "linear-gradient(90deg,#c9b6e6,#f7a1b4)",
-  "linear-gradient(90deg,#ffd98a,#ffb9a3)"
-];
+const BAR_SETS = {
+  peach:[
+    "linear-gradient(90deg,#ffb9a3,#ffd98a)",
+    "linear-gradient(90deg,#f7a1b4,#c9b6e6)",
+    "linear-gradient(90deg,#9bd6b8,#a8cdea)",
+    "linear-gradient(90deg,#a8cdea,#9bd6b8)",
+    "linear-gradient(90deg,#c9b6e6,#f7a1b4)",
+    "linear-gradient(90deg,#ffd98a,#ffb9a3)"
+  ],
+  ocean:[
+    "linear-gradient(90deg,#7fc4c9,#ffdf9e)",
+    "linear-gradient(90deg,#8fb8d9,#a9c9e8)",
+    "linear-gradient(90deg,#8fd6c2,#7ec8e3)",
+    "linear-gradient(90deg,#7ec8e3,#8fd6c2)",
+    "linear-gradient(90deg,#a9c9e8,#8fb8d9)",
+    "linear-gradient(90deg,#ffdf9e,#7fc4c9)"
+  ],
+  berry:[
+    "linear-gradient(90deg,#ff8fab,#ffd166)",
+    "linear-gradient(90deg,#ff6f9c,#e29be0)",
+    "linear-gradient(90deg,#c99bea,#b98ee0)",
+    "linear-gradient(90deg,#b98ee0,#c99bea)",
+    "linear-gradient(90deg,#e29be0,#ff6f9c)",
+    "linear-gradient(90deg,#ffd166,#ff8fab)"
+  ]
+};
+const THEMES = {
+  peach:{ label:"Peach Cozy", dots:["#ffb9a3","#9bd6b8","#c9b6e6"], confetti:["#ffb9a3","#f7a1b4","#9bd6b8","#a8cdea","#c9b6e6","#ffd98a"], vars:{
+    "--bg":"#fdf3ea","--bg2":"#fbe7dd","--panel-soft":"#fff6f0","--glow1":"#fff5ec","--glow2":"#fbe4ec",
+    "--peach":"#ffb9a3","--rose":"#f7a1b4","--mint":"#9bd6b8","--sky":"#a8cdea","--lilac":"#c9b6e6","--butter":"#ffd98a","--line":"#f0e2d8","--star":"#f6b23f",
+    "--tile-peach":"#ffcdbb","--tile-rose":"#f9c1cf","--tile-mint":"#bfe6d0","--tile-sky":"#c4ddf1","--tile-lilac":"#ddccf0","--tile-butter":"#ffe6ad"
+  }},
+  ocean:{ label:"Ocean Calm", dots:["#7fc4c9","#8fb8d9","#ffdf9e"], confetti:["#7fc4c9","#8fb8d9","#8fd6c2","#7ec8e3","#a9c9e8","#ffdf9e"], vars:{
+    "--bg":"#eef6f8","--bg2":"#e3f0f3","--panel-soft":"#f2fafb","--glow1":"#f4fbfc","--glow2":"#e6f3f7",
+    "--peach":"#7fc4c9","--rose":"#8fb8d9","--mint":"#8fd6c2","--sky":"#7ec8e3","--lilac":"#a9c9e8","--butter":"#ffdf9e","--line":"#dcebee","--star":"#4fa8b0",
+    "--tile-peach":"#bfe3e6","--tile-rose":"#c7dcf0","--tile-mint":"#c3ecdf","--tile-sky":"#c8e8f5","--tile-lilac":"#d3e2f2","--tile-butter":"#ffedc2"
+  }},
+  berry:{ label:"Berry Pop", dots:["#ff6f9c","#c99bea","#ffd166"], confetti:["#ff8fab","#ff6f9c","#c99bea","#b98ee0","#e29be0","#ffd166"], vars:{
+    "--bg":"#fdf0f5","--bg2":"#fbe1ec","--panel-soft":"#fff5fa","--glow1":"#fff0f6","--glow2":"#f7e0f5",
+    "--peach":"#ff8fab","--rose":"#ff6f9c","--mint":"#c99bea","--sky":"#b98ee0","--lilac":"#e29be0","--butter":"#ffd166","--line":"#f5d9e6","--star":"#ff5f96",
+    "--tile-peach":"#ffc2d1","--tile-rose":"#ffb8cf","--tile-mint":"#e6c2f0","--tile-sky":"#dcc2f5","--tile-lilac":"#f0c7ec","--tile-butter":"#ffe1a3"
+  }}
+};
+let barGrads = BAR_SETS.peach;
+let confettiColors = THEMES.peach.confetti;
 const DEFAULT = {
   kids:[
-    {name:"Kid 1", avatar:"🦁", points:0, goal:50, pet:"puppy"},
-    {name:"Kid 2", avatar:"🐯", points:0, goal:50, pet:"kitten"}
+    {name:"Kid 1", avatar:"🦁", points:0, today:0, bank:0, goal:50, pet:"puppy"},
+    {name:"Kid 2", avatar:"🐯", points:0, today:0, bank:0, goal:50, pet:"kitten"}
   ],
   tasks:[
     {emoji:"🦷", label:"Brush Teeth", val:5, color:"c-sky"},
@@ -259,15 +357,30 @@ const DEFAULT = {
     {emoji:"🎮", name:"Game Time", cost:40},
     {emoji:"🏞️", name:"Park Trip", cost:60},
     {emoji:"🧁", name:"Bake Day", cost:80}
-  ]
+  ],
+  tweaks:{theme:"peach", vibe:"playful", celebration:"big"}
 };
 let S = load();
 let active = 0; // whose turn is tapping
 
 function load(){
-  try{ const d = JSON.parse(localStorage.getItem("starSquad")); if(d&&d.kids&&d.kids.length) return d; }catch(e){}
+  try{
+    const d = JSON.parse(localStorage.getItem("starSquad"));
+    if(d&&d.kids&&d.kids.length){
+      d.kids.forEach(k=>{ if(typeof k.today!=="number") k.today=0; if(typeof k.bank!=="number") k.bank=0; });
+      if(!d.tweaks) d.tweaks={theme:"peach", vibe:"playful", celebration:"big"};
+      return d;
+    }
+  }catch(e){}
   return JSON.parse(JSON.stringify(DEFAULT));
 }
+function applyTheme(key){
+  const t = THEMES[key] || THEMES.peach;
+  Object.entries(t.vars).forEach(([k,v])=>document.documentElement.style.setProperty(k,v));
+  barGrads = BAR_SETS[key] || BAR_SETS.peach;
+  confettiColors = t.confetti;
+}
+function applyVibe(v){ document.body.classList.toggle("chill", v==="chill"); }
 function save(){ try{localStorage.setItem("starSquad",JSON.stringify(S))}catch(e){} }
 function clampActive(){ if(active>=S.kids.length) active=S.kids.length-1; if(active<0) active=0; }
 
@@ -281,18 +394,21 @@ function render(){
   board.innerHTML = S.kids.map((k,i)=>{
     const pct = Math.min(100, Math.round(k.points/(k.goal||1)*100));
     const winning = k.points===max && max>0 && leaders===1;
-    const bar = BAR_GRADS[i % BAR_GRADS.length];
+    const bar = barGrads[i % barGrads.length];
     const ratio = Math.min(1.15, k.points/(k.goal||1));
     const pet = petFor(k,i,ratio);
-    return `<div class="kid ${i===active?'active':''} ${winning?'winning':''}" onclick="setActive(${i})">
+    return `<div class="kid ${i===active?'active':''} ${winning?'winning':''}">
       <div class="lead">👑</div>
-      <div class="avatar">${esc(k.avatar)}</div>
-      <div class="name">${esc(k.name)}</div>
+      <div class="bank ${k.points<=0?'empty':''}" onclick="event.stopPropagation();bankIt(${i})" title="Tap to bank your ${k.points} unspent stars">🏦 ${k.bank||0}</div>
+      <div class="selectzone" onclick="setActive(${i})">
+        <div class="avatar">${esc(k.avatar)}</div>
+        <div class="name">${esc(k.name)}</div>
+        <div class="pts">${k.points}<small> / ${k.goal} ⭐</small></div>
+        <div class="barwrap"><div class="bar" style="width:${pct}%;background:${bar}"></div></div>
+        <div class="goaltxt">${k.goal-k.points>0?(k.goal-k.points)+" to go!":"Goal smashed! 🎉"}</div>
+      </div>
       <div class="petzone"><span class="pet" style="font-size:${pet.size}px" onclick="event.stopPropagation();openPet(${i})" title="Tap to choose a pet">${pet.emoji}</span></div>
       <div class="petstage">${pet.label} · tap to change</div>
-      <div class="pts">${k.points}<small> / ${k.goal} ⭐</small></div>
-      <div class="barwrap"><div class="bar" style="width:${pct}%;background:${bar}"></div></div>
-      <div class="goaltxt">${k.goal-k.points>0?(k.goal-k.points)+" to go!":"Goal smashed! 🎉"}</div>
     </div>`;
   }).join("");
 
@@ -311,7 +427,7 @@ function render(){
     </button>`;
   }).join("");
 
-  const pts = S.kids[active].points;
+  const pts = S.kids[active].points + (S.kids[active].bank||0);
   document.getElementById("prizes").innerHTML = S.prizes.map((p,i)=>`
     <div class="prize ${pts>=p.cost?'ready':''}">
       <div class="pe">${esc(p.emoji)}</div>
@@ -341,27 +457,50 @@ function doTask(i){
   k.counts = k.counts || {};
   k.counts[i] = (k.counts[i]||0)+1;
   k.points += S.tasks[i].val;
-  celebrate(CHEERS[Math.floor(Math.random()*CHEERS.length)]);
-  ding();
+  feedback(CHEERS[Math.floor(Math.random()*CHEERS.length)]);
   render();
   petAnim('petPop .6s ease');
 }
 function redeem(i){
   const p = S.prizes[i], k = S.kids[active];
-  if(k.points < p.cost) return;
-  k.points -= p.cost;
-  celebrate(p.emoji+" "+p.name.toUpperCase()+"!");
-  ding(true);
+  const total = k.points + (k.bank||0);
+  if(total < p.cost) return;
+  let remaining = p.cost;
+  const fromPoints = Math.min(k.points, remaining);
+  k.points -= fromPoints;
+  remaining -= fromPoints;
+  k.bank = (k.bank||0) - remaining;
+  feedback(p.emoji+" "+p.name.toUpperCase()+"!", true);
   render();
   petAnim('petShake .5s ease');
 }
+function bankIt(i){
+  const k = S.kids[i];
+  if(k.points<=0) return;
+  k.bank = (k.bank||0) + k.points;
+  k.points = 0;
+  save(); render();
+  feedback("BANKED! 🏦");
+}
 function resetDay(){
-  S.kids.forEach(k=>{k.done=[];k.counts={};});
+  S.kids.forEach(k=>{k.done=[];k.counts={};k.points=0;});
   render();
   celebrate("NEW DAY!");
 }
 
 /* ---------- celebration ---------- */
+function feedback(msg, big){
+  if(S.tweaks && S.tweaks.celebration==="quiet"){ quietToast(msg); return; }
+  celebrate(msg);
+  ding(big);
+}
+function quietToast(msg){
+  const t=document.getElementById("toast");
+  t.textContent = "✨ "+msg;
+  t.classList.add("show");
+  clearTimeout(quietToast._t);
+  quietToast._t = setTimeout(()=>t.classList.remove("show"),1100);
+}
 function celebrate(msg){
   const c=document.getElementById("cheer");
   document.getElementById("cheerMsg").textContent=msg;
@@ -374,12 +513,11 @@ const cv=document.getElementById("confetti"), ctx=cv.getContext("2d");
 let bits=[];
 function sizeCv(){cv.width=innerWidth;cv.height=innerHeight}
 sizeCv(); addEventListener("resize",sizeCv);
-const COLORS=["#ffb9a3","#f7a1b4","#9bd6b8","#a8cdea","#c9b6e6","#ffd98a"];
 function fireConfetti(){
   for(let i=0;i<90;i++){
     bits.push({x:innerWidth/2,y:innerHeight/2,
       vx:(Math.random()-.5)*15,vy:(Math.random()-.5)*15-4,
-      s:6+Math.random()*8,c:COLORS[i%COLORS.length],
+      s:6+Math.random()*8,c:confettiColors[i%confettiColors.length],
       rot:Math.random()*6,vr:(Math.random()-.5)*.4,life:72});
   }
   if(!raf) loop();
@@ -466,7 +604,7 @@ function readKidsEdit(){
 function addKid(){
   readKidsEdit(); readTaskEdit(); readPrizeEdit();
   const emojis=["🦁","🐯","🐻","🦊","🐨","🐸","🐵","🦄","🐙","🐢"];
-  S.kids.push({name:"Kid "+(S.kids.length+1), avatar:emojis[S.kids.length % emojis.length], points:0, goal:50, done:[], counts:{}, pet:PETS[S.kids.length % PETS.length].key});
+  S.kids.push({name:"Kid "+(S.kids.length+1), avatar:emojis[S.kids.length % emojis.length], points:0, today:0, bank:0, goal:50, done:[], counts:{}, pet:PETS[S.kids.length % PETS.length].key});
   renderKidsEdit();
 }
 function removeKid(i){
@@ -568,7 +706,12 @@ function restoreData(e){
   r.onload=()=>{
     try{
       const d=JSON.parse(r.result);
-      if(d&&d.kids&&d.tasks&&d.prizes){ S=d; active=0; save(); render(); celebrate("RESTORED! 📂"); }
+      if(d&&d.kids&&d.tasks&&d.prizes){
+        S=d; active=0;
+        if(!S.tweaks) S.tweaks={theme:"peach", vibe:"playful", celebration:"big"};
+        applyTheme(S.tweaks.theme); applyVibe(S.tweaks.vibe);
+        save(); render(); celebrate("RESTORED! 📂");
+      }
       else alert("That file doesn't look like a Star Squad backup.");
     }catch(err){ alert("Couldn't read that backup file."); }
   };
@@ -576,9 +719,30 @@ function restoreData(e){
   e.target.value="";
 }
 
+/* ---------- tweaks panel ---------- */
+function openTweaks(){ renderTweaks(); document.getElementById("tweaksModal").classList.add("show"); }
+function closeTweaks(){ document.getElementById("tweaksModal").classList.remove("show"); }
+function renderTweaks(){
+  document.getElementById("themeRow").innerHTML = Object.entries(THEMES).map(([key,t])=>`
+    <button type="button" class="swatch ${S.tweaks.theme===key?'sel':''}" onclick="setTheme('${key}')">
+      <span class="dots">${t.dots.map(c=>`<span class="dot" style="background:${c}"></span>`).join('')}</span>
+      <span class="sl">${t.label}</span>
+    </button>`).join("");
+  document.getElementById("vibeRow").innerHTML = [["playful","🎈 Playful"],["chill","🌙 Chill"]].map(([k,l])=>
+    `<button type="button" class="${S.tweaks.vibe===k?'sel':''}" onclick="setVibe('${k}')">${l}</button>`).join("");
+  document.getElementById("celebRow").innerHTML = [["big","🎉 Big"],["quiet","🤫 Quiet"]].map(([k,l])=>
+    `<button type="button" class="${S.tweaks.celebration===k?'sel':''}" onclick="setCelebration('${k}')">${l}</button>`).join("");
+}
+function setTheme(key){ S.tweaks.theme=key; applyTheme(key); save(); render(); renderTweaks(); }
+function setVibe(v){ S.tweaks.vibe=v; applyVibe(v); save(); renderTweaks(); }
+function setCelebration(c){ S.tweaks.celebration=c; save(); renderTweaks(); }
+
 /* clouds bg */
 (function(){const d=document.getElementById("clouds");const e=["☁️","⭐","🌸","☁️","✨"];let h="";for(let i=0;i<7;i++){h+=`<i style="left:${Math.random()*90}%;top:${5+Math.random()*80}%;animation-delay:${-Math.random()*26}s;animation-duration:${20+Math.random()*16}s">${e[i%e.length]}</i>`}d.innerHTML=h})();
 
+applyTheme(S.tweaks.theme);
+applyVibe(S.tweaks.vibe);
+document.getElementById("revtag").textContent = `rev ${REV} · ${REV_DATE}`;
 render();
 </script>
 </body>

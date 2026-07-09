@@ -8,7 +8,7 @@ between devices.
 
 ## What it does
 
-- **Two-kid scoreboard** — tap a name to switch whose turn it is; each kid has
+- **Multi-kid scoreboard** — tap a name to switch whose turn it is; each kid has
   their own point total, goal, and progress bar, with a crown shown for
   whoever's ahead.
 - **Task grid** — tap an emoji tile (brush teeth, get dressed, tidy toys,

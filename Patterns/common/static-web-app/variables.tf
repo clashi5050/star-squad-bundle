@@ -53,3 +53,22 @@ variable "app" {
   description = "Application name used in resource naming (e.g. starsquad)."
   type        = string
 }
+
+# --- Plan / backend services (added for accounts + sync) ---------------------
+variable "swa_sku" {
+  description = "Static Web App plan. Standard is required for custom auth, the managed API, and private endpoints. Was Free before accounts were added."
+  type        = string
+  default     = "Standard"
+}
+
+variable "cosmos_db_name" {
+  description = "Cosmos DB SQL database name that stores per-user app data."
+  type        = string
+  default     = "starsquad"
+}
+
+variable "cosmos_container_name" {
+  description = "Cosmos DB container holding one document per family, partitioned by /userId."
+  type        = string
+  default     = "families"
+}

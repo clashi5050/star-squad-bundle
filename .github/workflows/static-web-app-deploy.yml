@@ -1,12 +1,12 @@
 # Workflow name shown in the GitHub Actions UI
-name: 'Deploy Star Squad App'
+name: 'app-deploy-star-squad-web-app'
 
-# Trigger: deploy the static content whenever the app files change on main,
+# Trigger: deploy the static content whenever the app files change on dev,
 # and allow manual runs from the Actions UI.
 on:
   push:
     branches:
-      - main
+      - dev
     paths:
       - 'apps/star-squad/**'
       - '.github/workflows/static-web-app-deploy.yml'

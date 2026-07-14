@@ -9,6 +9,11 @@ crash.*.log
 **/terraform.auto.tfvars
 **/nonsecret.auto.tfvars
 
+# Cross-pass handoff files from scripts/setup-auth.sh (one holds a live
+# client secret — never commit these)
+scripts/.setup-auth-host
+scripts/.setup-auth-creds
+
 # Terraform lock file is fine to commit; uncomment to ignore if you prefer
 # .terraform.lock.hcl
 

@@ -57,9 +57,14 @@ Secrets (per environment):
 |---|---|
 | `GH_PAT` | Read access to the private `iac-modules` repo (module downloads) |
 | `AZURE_STATIC_WEB_APPS_API_TOKEN` | SWA content deployment token (set after step 1, via `set-swa-token.sh`) |
+| `TFSTATE_SUBSCRIPTION_ID` | Subscription the tfstate storage account lives in (set by `setup-oidc-and-secrets.sh`) |
 
 The remote state storage account/container/resource group are fixed in the
-committed [`backend.hcl`](backend.hcl) — no GitHub variables needed for these.
+committed [`backend.hcl`](backend.hcl) — no GitHub config needed for those. The
+subscription that storage account lives in is *not* committed there, unlike
+`ARM_SUBSCRIPTION_ID` above — see [Notes](#notes) — so it's a secret rather
+than a variable, and `terraform init` receives it via `-backend-config` at
+runtime.
 
 ## Creating the `GH_PAT` (fine-grained)
 
@@ -111,10 +116,13 @@ Notes:
   fixed in the committed [`backend.hcl`](backend.hcl) (currently
   `tfstatestoragelab2` / `tfstate` / `tfstatelab`). This storage account lives
   in a *different* subscription (`cjsazurelab`) than the one resources are
-  deployed into (`arm_subscription_id`), so `backend.hcl` also pins an explicit
-  `subscription_id` — the deploy service principal needs `Storage Account
-  Contributor` on the `tfstatelab` resource group in that subscription for
-  backend init to read the storage account's keys. Only the state **key** —
-  `<environment>-<short_loc>-static-web-app.tfstate` — still varies per
-  deployment and is passed via `-backend-config` on `terraform init`, so it
-  never collides with other patterns in the same storage account.
+  deployed into (`arm_subscription_id`) — the deploy service principal needs
+  `Storage Account Contributor` on the `tfstatelab` resource group in that
+  subscription for backend init to read the storage account's keys. Unlike
+  `ARM_SUBSCRIPTION_ID` (safe as a plain variable under OIDC — see above),
+  this subscription ID isn't meant to be publicly discoverable, so it's kept
+  out of `backend.hcl` entirely and passed to `terraform init` via
+  `-backend-config="subscription_id=..."` from the `TFSTATE_SUBSCRIPTION_ID`
+  secret. The state **key** — `<environment>-<short_loc>-static-web-app.tfstate`
+  — also varies per deployment and is passed the same way, so it never
+  collides with other patterns in the same storage account.

@@ -120,16 +120,20 @@ jobs:
 
       # Initializes Terraform: downloads providers/modules and connects to the
       # Azure backend for state. Storage account/container/resource group come
-      # from the committed backend.hcl; only the per-env state key is passed here.
+      # from the committed backend.hcl; the per-env state key and the tfstate
+      # subscription ID (kept out of the committed file — see backend.hcl) are
+      # passed here instead.
       - name: Terraform Init
         id: init
         env:
           ENVIRONMENT: ${{ fromJson(steps.set-matrix.outputs.matrix).environment }}
           SHORT_LOC: ${{ fromJson(steps.set-matrix.outputs.matrix).short_loc }}
+          TFSTATE_SUBSCRIPTION_ID: ${{ secrets.TFSTATE_SUBSCRIPTION_ID }}
         run: |
           terraform init \
             -backend-config=backend.hcl \
-            -backend-config="key=${ENVIRONMENT}-${SHORT_LOC}-static-web-app.tfstate"
+            -backend-config="key=${ENVIRONMENT}-${SHORT_LOC}-static-web-app.tfstate" \
+            -backend-config="subscription_id=${TFSTATE_SUBSCRIPTION_ID}"
 
       # Generates an execution plan showing what resources will be created, changed, or destroyed (does not apply anything)
       - name: Terraform Plan

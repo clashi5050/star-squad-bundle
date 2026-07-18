@@ -23,8 +23,13 @@ APP_NAME="gha-oidc-${GITHUB_REPO}-static-web-app"
 # GitHub environment these credentials are scoped to (matches workflow input).
 GH_ENVIRONMENT="main"
 
-# Remote-state backend coordinates are fixed in
+# Remote-state backend coordinates (storage account/container/RG) are fixed in
 # Patterns/common/static-web-app/backend.hcl (committed) — nothing to set here.
+# The tfstate storage account's subscription ID is deliberately NOT committed
+# (this repo is public and that subscription is treated as sensitive), so it
+# must be supplied here as an env var when you run this script, e.g.:
+#   TFSTATE_SUBSCRIPTION_ID="<guid>" ./setup-oidc-and-secrets.sh
+: "${TFSTATE_SUBSCRIPTION_ID:?Set TFSTATE_SUBSCRIPTION_ID to the tfstate storage account's subscription ID before running this script.}"
 
 # Role + scope for the SP. Contributor at subscription scope is typical for
 # these patterns; tighten to a resource group if your governance requires it.
@@ -109,6 +114,12 @@ gh api -X PUT "repos/${REPO}/environments/${GH_ENVIRONMENT}" >/dev/null 2>&1 || 
 gh variable set ARM_CLIENT_ID       --env "${GH_ENVIRONMENT}" --repo "${REPO}" --body "${CLIENT_ID}"
 gh variable set ARM_TENANT_ID       --env "${GH_ENVIRONMENT}" --repo "${REPO}" --body "${TENANT_ID}"
 gh variable set ARM_SUBSCRIPTION_ID --env "${GH_ENVIRONMENT}" --repo "${REPO}" --body "${SUBSCRIPTION_ID}"
+
+# TFSTATE_SUBSCRIPTION_ID is set as a *secret* (not a variable): unlike the
+# ARM_* IDs above, it identifies a subscription this repo's readers have no
+# other reason to know about, so it's kept masked rather than visible in the
+# repo's Settings > Variables UI.
+gh secret set TFSTATE_SUBSCRIPTION_ID --env "${GH_ENVIRONMENT}" --repo "${REPO}" --body "${TFSTATE_SUBSCRIPTION_ID}"
 
 echo
 echo ">> Done. Still TODO by hand (require values that only exist later):"

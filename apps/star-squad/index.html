@@ -218,6 +218,7 @@
   </div>
   <div class="footer">
     <button class="btn" onclick="openStats()">📊 Stats</button>
+    <button class="btn" onclick="openBank()">🏦 Bank</button>
     <button class="btn" id="soundBtn" onclick="toggleSound()">🔊 Sound</button>
     <button class="btn" onclick="openParent()">🔒 Grown-Up Settings</button>
     <button class="btn" onclick="backupData()">💾 Backup</button>
@@ -230,7 +231,7 @@
 <canvas id="confetti" aria-hidden="true"></canvas>
 <div class="toast" id="toast" role="status"><span id="toastMsg">Done!</span><button onclick="doUndo()">↩ Undo</button></div>
 <!-- Confirm -->
-<div class="modal" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+<div class="modal" id="confirmModal" style="z-index:78" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
   <div class="card" style="max-width:320px;text-align:center">
     <h3 id="confirmTitle">Are you sure?</h3>
     <div class="hint" id="confirmMsg" style="margin-bottom:6px"></div>
@@ -271,6 +272,15 @@
     <div class="hint">Streaks, badges, the last 2 weeks &amp; recent activity.</div>
     <div id="statsBody"></div>
     <div class="row"><button class="btn ghost" onclick="closeStats()">Close</button></div>
+  </div>
+</div>
+<!-- Bank -->
+<div class="modal" id="bankModal" role="dialog" aria-modal="true" aria-labelledby="bankTitle">
+  <div class="card">
+    <h3 id="bankTitle">🏦 Star Bank</h3>
+    <div class="hint">Turn stars into real money. Only grown-ups can move money.</div>
+    <div id="bankBody"></div>
+    <div class="row"><button class="btn ghost" onclick="closeBank()">Close</button></div>
   </div>
 </div>
 <!-- Pet picker -->
@@ -341,7 +351,7 @@ const COACH = [
 ];
 const DEFAULT = {
   version:SCHEMA,
-  settings:{sound:true,haptics:true,theme:"auto",pin:"",reminders:[],allowancePerStar:0},
+  settings:{sound:true,haptics:true,theme:"auto",pin:"",reminders:[],starsPerDollar:15},
   familyGoal:{emoji:"🍕",name:"Family Movie Night",target:150},
   familyProgress:0,
   activity:[],
@@ -380,10 +390,12 @@ function migrateKid(k){
   k.lifetimePoints=(typeof k.lifetimePoints==='number')?k.lifetimePoints:(k.points||0);
   k.lifetimeTasks=k.lifetimeTasks||0; k.happiness=(typeof k.happiness==='number')?k.happiness:60;
   k.badges=k.badges||[]; k.petName=k.petName||""; k.weeklyGoal=k.weeklyGoal||100;
+  k.bank=(typeof k.bank==='number')?k.bank:0;
   return k;
 }
 function migrate(d){
-  d.settings=Object.assign({sound:true,haptics:true,theme:"auto",pin:"",reminders:[],allowancePerStar:0}, d.settings||{});
+  d.settings=Object.assign({sound:true,haptics:true,theme:"auto",pin:"",reminders:[],starsPerDollar:15}, d.settings||{});
+  if(typeof d.settings.starsPerDollar!=='number'||d.settings.starsPerDollar<1){ d.settings.starsPerDollar=15; }
   d.familyGoal=d.familyGoal||{emoji:"🍕",name:"Family Movie Night",target:150};
   d.familyProgress=d.familyProgress||0; d.activity=d.activity||[];
   d.lastDay=d.lastDay||TODAY(); d.version=SCHEMA;
@@ -464,7 +476,6 @@ function render(){
   const points=S.kids.map(k=>k.points);
   const max=Math.max(...points);
   const leaders=points.filter(p=>p===max).length;
-  const rate=S.settings.allowancePerStar||0;
   board.innerHTML=S.kids.map((k,i)=>{
     const pct=Math.min(100,Math.round(k.points/(k.goal||1)*100));
     const winning=k.points===max&&max>0&&leaders===1;
@@ -475,7 +486,7 @@ function render(){
     const wk=weekEarned(k), wkPct=Math.min(100,Math.round(wk/(k.weeklyGoal||1)*100));
     const badgeIcons=(k.badges||[]).map(bk=>{const b=BADGES.find(x=>x.key===bk);return b?`<span title="${b.name}">${b.emoji}</span>`:"";}).join("");
     const petNm=k.petName?esc(k.petName):pet.label;
-    const cash=rate>0?`<div class="cash">${money(k.points*rate)} saved</div>`:"";
+    const cash=`<div class="cash">🏦 ${money(k.bank||0)} in bank</div>`;
     return `<div class="kid ${i===active?'active':''} ${winning?'winning':''}" role="listitem" tabindex="0" aria-label="${esc(k.name)}, ${k.points} of ${k.goal} stars${st>=2?', '+st+' day streak':''}" onclick="setActive(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setActive(${i});}">
       <div class="lead" aria-hidden="true">👑</div>
       <div class="streak ${st>=2?'on':''}" aria-hidden="true">🔥 ${st}</div>
@@ -733,6 +744,51 @@ function submitPin(){
   else { document.getElementById("pinMsg").textContent="Nope, try again"; document.getElementById("pinInput").value=""; }
 }
 function closePin(){ closeM("pinModal"); pinAfter=null; }
+/* ---------- bank ---------- */
+function openBank(){
+  if(S.settings.pin){ pinAfter=reallyOpenBank; document.getElementById("pinInput").value=""; document.getElementById("pinMsg").textContent="Grown-ups only — to move money"; openM("pinModal"); return; }
+  reallyOpenBank();
+}
+function reallyOpenBank(){ renderBank(); openM("bankModal"); }
+function renderBank(){
+  const rate=S.settings.starsPerDollar||15;
+  document.getElementById("bankBody").innerHTML=`
+    <div style="display:flex;gap:8px;align-items:center;margin:8px 0 14px;flex-wrap:wrap">
+      <span style="font-size:14px;color:var(--ink);font-weight:800">Rate:</span>
+      <input id="bankRate" type="number" min="1" step="1" value="${rate}" style="width:74px;text-align:center" onchange="setBankRate()">
+      <span style="font-size:14px;color:var(--ink-soft);font-weight:700">⭐ = $1</span>
+    </div>`
+    + S.kids.map((k,i)=>{
+      const worth=(k.points/rate);
+      const canOne=k.points>=rate, canFive=k.points>=rate*5;
+      return `<div class="kidedit">
+        <div class="kidhead"><b>${esc(k.avatar)} ${esc(k.name)}</b><span style="font-weight:800;color:var(--mint)">🏦 ${money(k.bank||0)}</span></div>
+        <div class="hint" style="margin:2px 0 8px">${k.points}⭐ &middot; worth ${money(worth)}</div>
+        <div class="bonusrow">
+          <button type="button" class="bb${canOne?' cash':''}" ${canOne?'':'disabled'} onclick="convertToMoney(${i},1)">Bank $1</button>
+          <button type="button" class="bb${canFive?' cash':''}" ${canFive?'':'disabled'} onclick="convertToMoney(${i},5)">Bank $5</button>
+          <button type="button" class="bb${canOne?' cash':''}" ${canOne?'':'disabled'} onclick="convertMax(${i})">Bank Max</button>
+          <button type="button" class="bb" ${(k.bank||0)>0?'':'disabled'} onclick="payOut(${i})">💵 Pay out</button>
+        </div>
+      </div>`;
+    }).join("");
+}
+function setBankRate(){ S.settings.starsPerDollar=Math.max(1,parseInt(gv("bankRate"))||15); save(); renderBank(); render(); }
+function convertToMoney(i,dollars){
+  const rate=S.settings.starsPerDollar||15; const need=dollars*rate; const k=S.kids[i];
+  if(k.points<need) return;
+  k.points-=need; k.bank=(k.bank||0)+dollars;
+  logAct("bank",k.name,`Banked ${money(dollars)} (−${need}⭐)`);
+  save(); renderBank(); render(); celebrate("💰 "+money(dollars)+" BANKED!"); ding(true); haptic([15,30,15]);
+}
+function convertMax(i){ const rate=S.settings.starsPerDollar||15; const d=Math.floor(S.kids[i].points/rate); if(d>0) convertToMoney(i,d); }
+function payOut(i){
+  const k=S.kids[i]; const amt=k.bank||0; if(amt<=0) return;
+  confirmBox("Pay out "+money(amt)+"?",`Hand ${esc(k.name)} their ${money(amt)} and reset their bank to $0.`,()=>{
+    logAct("payout",k.name,`Paid out ${money(amt)}`); k.bank=0; save(); renderBank(); render(); celebrate("💵 "+money(amt)+" PAID!");
+  });
+}
+function closeBank(){ closeM("bankModal"); }
 /* ---------- stats ---------- */
 function openStats(){ renderStats(); openM("statsModal"); }
 function closeStats(){ closeM("statsModal"); }
@@ -792,8 +848,9 @@ function renderParent(){
      <button class="btn miniadd" onclick="addReminder()">➕ Add a Reminder</button>
      <button class="btn" style="width:100%;margin-top:8px" onclick="requestReminderPermission()">Enable phone notifications</button>
      <hr style="border:none;border-top:2px solid var(--line);margin:20px 0 6px">
-     <label style="font-size:15px;color:var(--ink);font-weight:800">💵 Allowance</label>
-     <div style="display:flex;gap:8px;align-items:center;margin-top:6px"><span style="font-size:13px;color:var(--ink-soft);font-weight:700">1 ⭐ =</span><input id="allowRate" type="number" step="0.01" value="${s.allowancePerStar||0}" style="flex:1" placeholder="0.00"><span style="font-size:13px;color:var(--ink-soft);font-weight:700">dollars</span></div>
+     <label style="font-size:15px;color:var(--ink);font-weight:800">🏦 Star Bank</label>
+     <div style="display:flex;gap:8px;align-items:center;margin-top:6px"><input id="rateSet" type="number" min="1" step="1" value="${s.starsPerDollar||15}" style="width:74px;text-align:center"><span style="font-size:13px;color:var(--ink-soft);font-weight:700">⭐ = $1</span></div>
+     <div class="hint">Open 🏦 Bank on the main screen to convert stars &amp; pay out.</div>
      <label style="font-size:15px;color:var(--ink);font-weight:800;margin-top:16px">🔒 Parent PIN</label>
      <div class="hint">Leave blank for no lock. 4 digits.</div>
      <input id="pinSet" type="text" inputmode="numeric" maxlength="4" value="${esc(s.pin||'')}" placeholder="e.g. 1234">
@@ -832,12 +889,10 @@ function renderKidsEdit(){
         <button type="button" class="bb" onclick="bonus(${i},1)">+1</button>
         <button type="button" class="bb" onclick="bonus(${i},5)">+5</button>
         <button type="button" class="bb" onclick="bonus(${i},10)">+10</button>
-        ${(S.settings.allowancePerStar||0)>0?`<button type="button" class="bb cash" onclick="cashOut(${i})">💵 Cash out ${money(k.points*(S.settings.allowancePerStar||0))}</button>`:``}
       </div>
     </div>`).join("");
 }
 function bonus(i,n){ readAllEdits(); const k=S.kids[i]; k.points+=n;k.todayEarned=(k.todayEarned||0)+n;k.lifetimePoints=(k.lifetimePoints||0)+n;k.happiness=Math.min(100,(k.happiness||60)+4);S.familyProgress=(S.familyProgress||0)+n; logAct("bonus",k.name,`+${n}⭐ surprise`); checkBadges(i); save(); renderKidsEdit(); }
-function cashOut(i){ readAllEdits(); const k=S.kids[i]; const amt=k.points*(S.settings.allowancePerStar||0); if(k.points<=0) return; logAct("cashout",k.name,`Cashed out ${money(amt)} (${k.points}⭐)`); k.points=0; save(); renderKidsEdit(); celebrate("💵 "+money(amt)+"!"); }
 function readKidsEdit(){ S.kids=S.kids.map((k,i)=>({...k,name:(gv("kn"+i)??k.name).trim()||k.name,avatar:(gv("ke"+i)??k.avatar).trim()||"⭐",goal:Math.max(5,parseInt(gv("kg"+i))||k.goal),weeklyGoal:Math.max(5,parseInt(gv("kw"+i))||k.weeklyGoal)})); }
 function gv(id){ const el=document.getElementById(id); return el?el.value:undefined; }
 function addKid(){ readAllEdits(); S.kids.push(migrateKid({name:"Kid "+(S.kids.length+1),avatar:AVATAR_CHOICES[S.kids.length%AVATAR_CHOICES.length],points:0,goal:50,weeklyGoal:100,done:[],counts:{},pet:PETS[S.kids.length%PETS.length].key})); renderKidsEdit(); }
@@ -879,7 +934,7 @@ function addReminder(){ readAllEdits(); S.settings.reminders=S.settings.reminder
 function removeReminder(i){ readAllEdits(); S.settings.reminders.splice(i,1); renderRemEdit(); }
 function readMisc(){
   S.familyGoal={emoji:(gv("fgE")||S.familyGoal.emoji).trim()||"🎯",name:(gv("fgN")||S.familyGoal.name).trim()||"Family reward",target:Math.max(10,parseInt(gv("fgT"))||S.familyGoal.target)};
-  S.settings.allowancePerStar=Math.max(0,parseFloat(gv("allowRate"))||0);
+  S.settings.starsPerDollar=Math.max(1,parseInt(gv("rateSet"))||15);
   S.settings.pin=(gv("pinSet")||"").replace(/\D/g,"").slice(0,4);
 }
 function readAllEdits(){ if(document.getElementById("kn0")||document.getElementById("kidsEdit")){readKidsEdit();readTaskEdit();readPrizeEdit();readRemEdit();readMisc();} }

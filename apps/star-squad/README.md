@@ -1,3 +1,6 @@
+Updates:
+Added banking feature
+
 # Star Squad ⭐
 
 A single-page reward chart for kids. Tap a chore to earn stars, watch the

@@ -5,140 +5,116 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Star Squad</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Star Squad">
-<meta name="theme-color" content="#fdf3ea">
+<meta name="theme-color" content="#fdf3ea" id="themeColorMeta">
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23ffb9a3'/%3E%3Ctext x='90' y='128' font-size='110' text-anchor='middle'%3E%E2%AD%90%3C/text%3E%3C/svg%3E">
+<link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Star%20Squad%22%2C%22short_name%22%3A%22Star%20Squad%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%23fdf3ea%22%2C%22theme_color%22%3A%22%23fdf3ea%22%2C%22start_url%22%3A%22.%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%253D%2527http%253A%252F%252Fwww.w3.org%252F2000%252Fsvg%2527%2520viewBox%253D%25270%25200%2520180%2520180%2527%253E%253Crect%2520width%253D%2527180%2527%2520height%253D%2527180%2527%2520rx%253D%252740%2527%2520fill%253D%2527%25230e1a3a%2527%252F%253E%253Ctext%2520x%253D%252790%2527%2520y%253D%2527128%2527%2520font-size%253D%2527110%2527%2520text-anchor%253D%2527middle%2527%253E%25E2%25AD%2590%253C%252Ftext%253E%253C%252Fsvg%253E%22%2C%22sizes%22%3A%22180x180%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#fdf3ea;
-    --bg2:#fbe7dd;
-    --panel:#ffffff;
-    --panel-soft:#fff6f0;
-    --ink:#5b4a45;
-    --ink-soft:#9b877f;
-    --star:#f6b23f;
-    --peach:#ffb9a3;
-    --rose:#f7a1b4;
-    --mint:#9bd6b8;
-    --sky:#a8cdea;
-    --lilac:#c9b6e6;
-    --butter:#ffd98a;
-    --line:#f0e2d8;
-    --glow1:#fff5ec;
-    --glow2:#fbe4ec;
-    --tile-peach:#ffcdbb;
-    --tile-rose:#f9c1cf;
-    --tile-mint:#bfe6d0;
-    --tile-sky:#c4ddf1;
-    --tile-lilac:#ddccf0;
-    --tile-butter:#ffe6ad;
+    --bg:#fdf3ea; --bg2:#fbe7dd; --panel:#ffffff; --panel-soft:#fff6f0;
+    --ink:#5b4a45; --ink-soft:#9b877f;
+    --star:#f6b23f; --peach:#ffb9a3; --rose:#f7a1b4; --mint:#9bd6b8;
+    --sky:#a8cdea; --lilac:#c9b6e6; --butter:#ffd98a; --line:#f0e2d8;
+    --tile-ink:#5b4a45; --shadow:rgba(180,120,90,.10);
+  }
+  [data-theme="dark"]{
+    --bg:#191d2e; --bg2:#242a40; --panel:#232840; --panel-soft:#2b3150;
+    --ink:#f1ede9; --ink-soft:#b7abd6; --line:#3a4163; --shadow:rgba(0,0,0,.35);
+    --peach:#ff9f86;
+  }
+  [data-theme="ocean"]{
+    --bg:#eef6fc; --bg2:#dcecf7; --panel:#ffffff; --panel-soft:#f2f8fd;
+    --ink:#31485c; --ink-soft:#7a94a8; --peach:#6fc0d9; --line:#dbeaf3; --star:#2f9fc4;
+  }
+  [data-theme="berry"]{
+    --bg:#faeef6; --bg2:#f3dcec; --panel:#ffffff; --panel-soft:#fdf1f8;
+    --ink:#5a3d52; --ink-soft:#a385a0; --peach:#e58bbf; --line:#f0dcea; --star:#c4519a;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
   html,body{height:100%}
   body{
     font-family:"Quicksand","Trebuchet MS",system-ui,sans-serif;
     background:
-      radial-gradient(90% 60% at 15% 0%, var(--glow1) 0%, transparent 60%),
-      radial-gradient(80% 60% at 100% 10%, var(--glow2) 0%, transparent 55%),
+      radial-gradient(90% 60% at 15% 0%, color-mix(in srgb,var(--panel-soft) 70%, transparent) 0%, transparent 60%),
       var(--bg);
-    transition:background-color .4s;
-    color:var(--ink);
-    overflow-x:hidden;
-    -webkit-font-smoothing:antialiased;
+    color:var(--ink); overflow-x:hidden; -webkit-font-smoothing:antialiased;
     padding-bottom:env(safe-area-inset-bottom);
   }
   .clouds{position:fixed;inset:0;pointer-events:none;z-index:0}
   .clouds i{position:absolute;font-size:26px;opacity:.5;animation:drift 26s linear infinite}
   @keyframes drift{from{transform:translateX(-12vw)}to{transform:translateX(112vw)}}
-
   .wrap{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:20px 16px 44px}
-
   header{text-align:center;margin:4px 0 18px}
-  .title{
-    font-family:"Baloo 2",inherit;font-size:34px;font-weight:800;letter-spacing:.3px;color:var(--ink);
-  }
+  .title{font-family:"Baloo 2",inherit;font-size:34px;font-weight:800;letter-spacing:.3px;color:var(--ink)}
   .title .s{color:var(--star)}
   .subtitle{font-size:14px;color:var(--ink-soft);margin-top:2px;font-weight:600}
-  .revtag{font-size:10.5px;color:var(--ink-soft);opacity:.6;margin-top:4px;font-weight:600;letter-spacing:.3px}
-
   /* scoreboard */
   .board{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
-  .kid{
-    border-radius:26px;padding:16px 14px 16px;position:relative;overflow:hidden;
-    background:var(--panel);border:3px solid var(--line);
-    box-shadow:0 8px 20px rgba(180,120,90,.10);
-    transition:transform .18s,border-color .2s,box-shadow .2s;cursor:pointer;text-align:center;
-  }
+  .kid{border-radius:26px;padding:16px 14px 16px;position:relative;overflow:hidden;background:var(--panel);border:3px solid var(--line);box-shadow:0 8px 20px var(--shadow);transition:transform .18s,border-color .2s,box-shadow .2s;cursor:pointer;text-align:center}
+  .kid:focus-visible{outline:3px solid var(--star);outline-offset:2px}
   .kid.active{border-color:var(--peach);transform:translateY(-3px);box-shadow:0 12px 26px rgba(255,150,120,.22)}
   .kid .avatar{font-size:46px;line-height:1;filter:drop-shadow(0 3px 3px rgba(0,0,0,.12))}
   .kid .name{font-family:"Baloo 2",inherit;font-size:19px;font-weight:800;margin-top:2px}
   .kid .pts{font-family:"Baloo 2",inherit;font-size:30px;font-weight:800;color:var(--star);line-height:1.15}
   .kid .pts small{font-size:13px;color:var(--ink-soft);font-weight:700}
+  .kid .cash{font-size:12px;color:var(--mint);font-weight:800;margin-top:-2px}
   .kid .lead{position:absolute;top:10px;right:12px;font-size:22px;opacity:0;transition:opacity .3s}
   .kid.winning .lead{opacity:1;animation:bob 1.4s infinite ease-in-out}
   @keyframes bob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-4px) rotate(6deg)}}
+  .kid .streak{position:absolute;top:10px;left:12px;font-size:12px;font-weight:800;background:#fff3e0;color:#d9822b;border:2px solid #ffd9a8;padding:2px 8px;border-radius:99px;display:none}
+  .kid .streak.on{display:inline-block;animation:pop .4s}
   .kid .barwrap{height:14px;background:var(--bg2);border-radius:99px;margin-top:12px;overflow:hidden}
   .kid .bar{height:100%;width:0;border-radius:99px;transition:width .6s cubic-bezier(.2,.9,.3,1)}
   .kid .goaltxt{font-size:11.5px;color:var(--ink-soft);margin-top:7px;font-weight:600}
-  .kid .bank{position:absolute;top:10px;left:12px;background:var(--panel-soft);border:2px solid var(--butter);border-radius:99px;padding:4px 10px;font-family:"Baloo 2",inherit;font-size:11.5px;font-weight:800;color:#8a6a2f;cursor:pointer;display:flex;align-items:center;gap:3px;z-index:2}
-  .kid .bank:active{transform:scale(.94)}
-  .kid .bank.empty{opacity:.55;cursor:default}
-  .kid .selectzone{cursor:pointer}
-  .kid .petzone{height:66px;display:flex;align-items:flex-end;justify-content:center;margin-top:14px;padding-top:10px;border-top:2px solid var(--line)}
+  .kid .weekwrap{height:7px;background:var(--bg2);border-radius:99px;margin-top:8px;overflow:hidden}
+  .kid .weekbar{height:100%;width:0;border-radius:99px;background:var(--sky);transition:width .5s}
+  .kid .weektxt{font-size:10px;color:var(--ink-soft);font-weight:700;margin-top:4px}
+  .kid .petzone{height:80px;display:flex;align-items:flex-end;justify-content:center;margin-top:8px}
   .kid .pet{line-height:1;filter:drop-shadow(0 4px 4px rgba(0,0,0,.15));transition:font-size .6s cubic-bezier(.2,.9,.3,1);cursor:pointer;animation:petIdle 2.8s ease-in-out infinite;transform-origin:bottom center}
   .kid .pet:active{transform:scale(.9)}
-  .kid .petstage{font-size:11px;color:var(--ink-soft);font-weight:700;margin-top:4px}
+  .kid .petname{font-family:"Baloo 2",inherit;font-size:13px;font-weight:800;color:var(--ink);margin-top:2px}
+  .kid .petstage{font-size:11px;color:var(--ink-soft);font-weight:700;margin-top:2px}
+  .kid .hearts{font-size:12px;margin-top:3px;letter-spacing:1px;line-height:1}
+  .kid .badges{display:flex;gap:3px;justify-content:center;flex-wrap:wrap;margin-top:8px;min-height:18px}
+  .kid .badges span{font-size:15px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.12))}
   .petgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:14px}
-  .petopt{background:var(--panel-soft);border:2px solid var(--line);border-radius:16px;padding:12px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;font-family:inherit}
+  .petopt{background:var(--panel-soft);border:2px solid var(--line);border-radius:16px;padding:12px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;font-family:inherit;color:var(--ink)}
   .petopt .pe{font-size:38px;line-height:1}
   .petopt .pl{font-family:"Baloo 2",inherit;font-size:12px;font-weight:700;color:var(--ink)}
-  .petopt.sel{border-color:var(--peach);background:#fff;box-shadow:0 0 0 3px rgba(255,185,163,.35)}
-
+  .petopt.sel{border-color:var(--peach);background:var(--panel);box-shadow:0 0 0 3px rgba(255,185,163,.35)}
   .whoseturn{text-align:center;font-size:14px;font-weight:700;margin:2px 0 16px;color:var(--ink-soft)}
   .whoseturn b{color:var(--peach)}
-
+  /* family goal */
+  .familybar{background:var(--panel);border-radius:22px;padding:14px 16px;border:3px solid var(--line);box-shadow:0 8px 20px var(--shadow);margin-bottom:16px;text-align:center}
+  .familybar .ft{font-family:"Baloo 2",inherit;font-weight:800;font-size:15px;color:var(--ink)}
+  .familybar .fwrap{height:16px;background:var(--bg2);border-radius:99px;margin-top:10px;overflow:hidden}
+  .familybar .fbar{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--rose),var(--butter));transition:width .6s}
+  .familybar .fsub{font-size:12px;color:var(--ink-soft);font-weight:700;margin-top:7px}
+  .familybar .fredeem{margin-top:9px;font-family:"Baloo 2",inherit;font-weight:800;font-size:13px;background:var(--mint);color:#2f5a45;border:none;border-radius:99px;padding:7px 18px;cursor:pointer;opacity:.4;pointer-events:none}
+  .familybar.ready .fredeem{opacity:1;pointer-events:auto;animation:glow 1.8s infinite}
   /* task grid */
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   @media(min-width:460px){.grid{grid-template-columns:1fr 1fr 1fr}}
-  .task{
-    border:3px solid rgba(255,255,255,.6);border-radius:28px;padding:16px 10px 14px;color:var(--ink);
-    font-family:inherit;font-weight:700;font-size:15px;cursor:pointer;position:relative;
-    box-shadow:0 6px 14px rgba(180,120,90,.14);transition:transform .1s,box-shadow .1s,filter .25s;
-    display:flex;flex-direction:column;align-items:center;gap:7px;min-height:120px;justify-content:center;
-  }
-  .task:active{transform:translateY(3px) scale(.99);box-shadow:0 3px 8px rgba(180,120,90,.14)}
+  .task{border:3px solid rgba(255,255,255,.6);border-radius:28px;padding:16px 10px 14px;color:var(--tile-ink);font-family:inherit;font-weight:700;font-size:15px;cursor:pointer;position:relative;box-shadow:0 6px 14px var(--shadow);transition:transform .1s,box-shadow .1s,filter .25s;display:flex;flex-direction:column;align-items:center;gap:7px;min-height:120px;justify-content:center}
+  .task:focus-visible{outline:3px solid var(--star);outline-offset:2px}
+  .task:active{transform:translateY(3px) scale(.99);box-shadow:0 3px 8px var(--shadow)}
   .task .emoji{font-size:48px;line-height:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.1))}
   .task .lbl{font-family:"Baloo 2",inherit;font-weight:700}
-  .task .val{position:absolute;top:9px;right:12px;font-size:13px;font-weight:800;background:rgba(255,255,255,.55);padding:2px 9px;border-radius:99px;color:var(--ink)}
-  .task .cnt{position:absolute;top:9px;left:12px;font-size:13px;font-weight:800;background:var(--ink);color:#fff;padding:2px 9px;border-radius:99px;animation:pop .35s}
-  .task.done{filter:saturate(.55) brightness(.99)}
-  .task.done::after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:56px;color:#fff;text-shadow:0 3px 6px rgba(120,90,70,.35);animation:pop .45s}
+  .task .val{position:absolute;top:9px;right:12px;font-size:13px;font-weight:800;background:rgba(255,255,255,.55);padding:2px 9px;border-radius:99px;color:#5b4a45}
+  .task .cnt{position:absolute;top:9px;left:12px;font-size:13px;font-weight:800;background:#5b4a45;color:#fff;padding:2px 9px;border-radius:99px;animation:pop .35s}
   @keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
-  .c-peach{background:var(--tile-peach)} .c-rose{background:var(--tile-rose)} .c-mint{background:var(--tile-mint)}
-  .c-sky{background:var(--tile-sky)} .c-lilac{background:var(--tile-lilac)} .c-butter{background:var(--tile-butter)}
-
-  /* chill vibe: calmer motion + softer shapes */
-  body.chill .kid{border-radius:18px;transition:border-color .2s,box-shadow .2s}
-  body.chill .kid.active{transform:none;box-shadow:0 8px 20px rgba(180,120,90,.10)}
-  body.chill .kid.winning .lead{animation:none}
-  body.chill .pet{animation:none}
-  body.chill .task{border-radius:18px}
-  body.chill .task:active{transform:none;box-shadow:0 6px 14px rgba(180,120,90,.14)}
-  body.chill .prize.ready{animation:none}
-  body.chill .clouds i{animation-duration:52s}
-
+  .c-peach{background:#ffcdbb} .c-rose{background:#f9c1cf} .c-mint{background:#bfe6d0}
+  .c-sky{background:#c4ddf1} .c-lilac{background:#ddccf0} .c-butter{background:#ffe6ad}
   /* prize row */
-  .prizebar{margin-top:22px;background:var(--panel);border-radius:26px;padding:18px;box-shadow:0 8px 20px rgba(180,120,90,.10);border:3px solid var(--line)}
+  .prizebar{margin-top:22px;background:var(--panel);border-radius:26px;padding:18px;box-shadow:0 8px 20px var(--shadow);border:3px solid var(--line)}
   .prizebar h2{font-family:"Baloo 2",inherit;font-size:17px;margin-bottom:14px;text-align:center;color:var(--ink)}
   .prizes{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px}
-  .prize{
-    min-width:100px;flex-shrink:0;background:var(--panel-soft);border-radius:22px;padding:14px 8px;text-align:center;
-    border:3px solid var(--line);transition:border-color .2s,transform .15s,box-shadow .2s;
-  }
+  .prize{min-width:100px;flex-shrink:0;background:var(--panel-soft);border-radius:22px;padding:14px 8px;text-align:center;border:3px solid var(--line);transition:border-color .2s,transform .15s,box-shadow .2s}
   .prize.ready{border-color:var(--mint);animation:glow 1.8s infinite}
   @keyframes glow{0%,100%{box-shadow:0 0 0 rgba(155,214,184,0)}50%{box-shadow:0 0 18px rgba(155,214,184,.7)}}
   .prize .pe{font-size:36px}
@@ -146,94 +122,156 @@
   .prize .pc{font-family:"Baloo 2",inherit;font-size:13px;font-weight:800;color:var(--star)}
   .prize .redeem{margin-top:7px;font-family:"Baloo 2",inherit;font-size:11.5px;font-weight:800;background:var(--mint);color:#2f5a45;border:none;border-radius:99px;padding:5px 12px;cursor:pointer;opacity:.4;pointer-events:none}
   .prize.ready .redeem{opacity:1;pointer-events:auto}
-
   /* controls */
   .footer{margin-top:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-  .btn{background:var(--panel);border:2px solid var(--line);color:var(--ink);font-family:inherit;font-weight:700;font-size:13px;padding:10px 16px;border-radius:99px;cursor:pointer;box-shadow:0 3px 8px rgba(180,120,90,.08)}
+  .btn{background:var(--panel);border:2px solid var(--line);color:var(--ink);font-family:inherit;font-weight:700;font-size:13px;padding:10px 16px;border-radius:99px;cursor:pointer;box-shadow:0 3px 8px var(--shadow)}
   .btn:active{transform:scale(.96)}
-
+  .btn:focus-visible{outline:3px solid var(--star);outline-offset:2px}
   /* celebration overlay */
   .cheer{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;pointer-events:none}
   .cheer.show{display:flex}
-  .cheer .msg{font-family:"Baloo 2",inherit;font-size:60px;font-weight:800;color:#fff;text-shadow:0 4px 0 rgba(247,161,180,.65),0 8px 18px rgba(0,0,0,.15);animation:cheerpop .8s ease}
+  .cheer .msg{font-family:"Baloo 2",inherit;font-size:60px;font-weight:800;color:#fff;text-shadow:0 4px 0 rgba(247,161,180,.65),0 8px 18px rgba(0,0,0,.15);animation:cheerpop .8s ease;text-align:center;padding:0 12px}
   @keyframes cheerpop{0%{transform:scale(0) rotate(-12deg);opacity:0}40%{transform:scale(1.25) rotate(4deg);opacity:1}100%{transform:scale(1) rotate(0)}}
   canvas#confetti{position:fixed;inset:0;z-index:49;pointer-events:none}
-
-  /* parent modal */
-  .modal{position:fixed;inset:0;background:rgba(91,74,69,.5);backdrop-filter:blur(3px);z-index:60;display:none;align-items:center;justify-content:center;padding:20px}
+  /* toast */
+  .toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(140%);z-index:70;background:var(--ink);color:var(--bg);border-radius:99px;padding:10px 12px 10px 18px;display:flex;align-items:center;gap:12px;font-family:"Baloo 2",inherit;font-weight:700;font-size:14px;box-shadow:0 10px 26px rgba(80,55,45,.35);transition:transform .3s cubic-bezier(.2,.9,.3,1)}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .toast button{background:var(--butter);color:#7a5a20;border:none;font-family:inherit;font-weight:800;font-size:13px;padding:6px 14px;border-radius:99px;cursor:pointer}
+  /* modal */
+  .modal{position:fixed;inset:0;background:rgba(30,20,18,.5);backdrop-filter:blur(3px);z-index:60;display:none;align-items:center;justify-content:center;padding:20px}
   .modal.show{display:flex}
-  .card{background:var(--panel);border-radius:26px;padding:24px;max-width:380px;width:100%;max-height:86vh;overflow:auto;box-shadow:0 20px 50px rgba(120,90,70,.3)}
+  .card{background:var(--panel);border-radius:26px;padding:24px;max-width:380px;width:100%;max-height:86vh;overflow:auto;box-shadow:0 20px 50px rgba(30,20,18,.4)}
   .card h3{font-family:"Baloo 2",inherit;margin-bottom:8px;font-size:21px;color:var(--ink)}
   .card .hint{font-size:12px;color:var(--ink-soft);margin-bottom:8px}
   .card label{display:block;font-size:12.5px;color:var(--ink-soft);margin:12px 0 4px;font-weight:700}
-  .card input{width:100%;padding:11px 13px;border-radius:14px;border:2px solid var(--line);background:var(--panel-soft);color:var(--ink);font-family:inherit;font-size:15px;font-weight:600}
+  .card input,.card select{width:100%;padding:11px 13px;border-radius:14px;border:2px solid var(--line);background:var(--panel-soft);color:var(--ink);font-family:inherit;font-size:15px;font-weight:600}
   .kidedit{background:var(--panel-soft);border:2px solid var(--line);border-radius:18px;padding:12px 14px;margin-top:12px;position:relative}
   .kidedit .kidhead{display:flex;align-items:center;justify-content:space-between}
   .kidedit .kidhead b{font-family:"Baloo 2",inherit;font-size:14px}
+  .bonusrow{display:flex;gap:6px;align-items:center;margin-top:10px;flex-wrap:wrap}
+  .bonusrow .bl{font-size:12px;color:var(--ink-soft);font-weight:700;flex:1;min-width:80px}
+  .bonusrow .bb{font-family:"Baloo 2",inherit;font-weight:800;font-size:13px;background:var(--butter);color:#7a5a20;border:none;border-radius:99px;padding:6px 12px;cursor:pointer}
+  .bonusrow .bb.cash{background:var(--mint);color:#2f5a45}
   .card .row{display:flex;gap:10px;margin-top:20px}
   .card .row .btn{flex:1;border-color:transparent;background:var(--peach);color:#7a463a;font-weight:800}
   .card .row .btn.ghost{background:var(--panel);border:2px solid var(--line);color:var(--ink)}
   .miniadd{width:100%;margin-top:12px;border-color:var(--mint);color:#2f6a4d;background:var(--panel)}
-  .lock{position:fixed;bottom:16px;right:16px;z-index:40;width:50px;height:50px;border-radius:50%;background:var(--panel);border:2px solid var(--line);color:var(--ink);font-size:22px;cursor:pointer;box-shadow:0 6px 16px rgba(180,120,90,.2)}
-  .tweaksbtn{position:fixed;bottom:16px;left:16px;z-index:40;width:50px;height:50px;border-radius:50%;background:var(--panel);border:2px solid var(--line);color:var(--ink);font-size:22px;cursor:pointer;box-shadow:0 6px 16px rgba(180,120,90,.2)}
-  .tweaksbtn:active{transform:scale(.94)}
-  .swatchrow{display:flex;gap:10px;margin-top:8px}
-  .swatch{flex:1;border-radius:16px;border:2px solid var(--line);padding:10px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--panel-soft);font-family:inherit}
-  .swatch .dots{display:flex;gap:3px}
-  .swatch .dot{width:14px;height:14px;border-radius:50%}
-  .swatch .sl{font-family:"Baloo 2",inherit;font-size:11px;font-weight:700;color:var(--ink)}
-  .swatch.sel{border-color:var(--peach);box-shadow:0 0 0 3px rgba(255,185,163,.3);background:#fff}
-  .seg{display:flex;gap:8px;margin-top:8px}
-  .seg button{flex:1;padding:10px 8px;border-radius:14px;border:2px solid var(--line);background:var(--panel-soft);font-family:"Baloo 2",inherit;font-weight:700;font-size:12.5px;color:var(--ink);cursor:pointer}
-  .seg button.sel{border-color:var(--peach);background:#fff;box-shadow:0 0 0 3px rgba(255,185,163,.3)}
-  .seg button:active{transform:scale(.96)}
-  .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-16px);background:var(--panel);border:2px solid var(--mint);border-radius:99px;padding:9px 20px;font-family:"Baloo 2",inherit;font-weight:800;font-size:14px;color:#2f6a4d;box-shadow:0 8px 20px rgba(180,120,90,.15);z-index:55;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none}
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .seg{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .seg button{flex:1;min-width:64px;padding:9px 6px;border:2px solid var(--line);background:var(--panel-soft);color:var(--ink);border-radius:12px;font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer}
+  .seg button.sel{border-color:var(--peach);background:var(--panel);box-shadow:0 0 0 3px rgba(255,185,163,.3)}
+  .swatch{width:16px;height:16px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:-2px;border:1px solid rgba(0,0,0,.15)}
+  .lock{position:fixed;bottom:16px;right:16px;z-index:40;width:50px;height:50px;border-radius:50%;background:var(--panel);border:2px solid var(--line);color:var(--ink);font-size:22px;cursor:pointer;box-shadow:0 6px 16px var(--shadow)}
+  /* emoji picker */
+  .emojipick{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:6px}
+  .emojipick button{font-size:24px;padding:6px 0;border:2px solid var(--line);background:var(--panel-soft);border-radius:12px;cursor:pointer}
+  .emojipick button.sel{border-color:var(--peach);background:var(--panel);box-shadow:0 0 0 3px rgba(255,185,163,.35)}
+  /* stats */
+  .statkid{background:var(--panel-soft);border:2px solid var(--line);border-radius:18px;padding:14px;margin-top:12px}
+  .statkid .sh{display:flex;align-items:center;gap:8px;font-family:"Baloo 2",inherit;font-weight:800;font-size:16px;color:var(--ink)}
+  .statrow{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .stat{flex:1;min-width:74px;background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:8px;text-align:center}
+  .stat .n{font-family:"Baloo 2",inherit;font-weight:800;font-size:20px;color:var(--star)}
+  .stat .l{font-size:10.5px;color:var(--ink-soft);font-weight:700}
+  .heat{display:flex;gap:4px;margin-top:12px;justify-content:space-between}
+  .heat .d{flex:1;aspect-ratio:1;border-radius:6px;background:var(--bg2);display:flex;align-items:flex-end;justify-content:center;font-size:8px;color:var(--ink-soft);font-weight:700}
+  .badgeshelf{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+  .bcell{text-align:center;background:var(--panel);border:2px solid var(--line);border-radius:14px;padding:8px 4px}
+  .bcell.locked{opacity:.35;filter:grayscale(1)}
+  .bcell .be{font-size:26px;line-height:1}
+  .bcell .bn{font-size:9.5px;color:var(--ink-soft);font-weight:700;margin-top:3px;line-height:1.1}
+  .actlog{margin-top:14px;max-height:170px;overflow:auto;border-top:2px solid var(--line);padding-top:10px}
+  .actlog .a{font-size:12px;color:var(--ink);padding:4px 0;border-bottom:1px dashed var(--line);display:flex;justify-content:space-between;gap:8px}
+  .actlog .a small{color:var(--ink-soft);white-space:nowrap}
+  /* tutorial */
+  .coach{position:fixed;inset:0;z-index:80;background:rgba(30,20,18,.6);display:none;align-items:center;justify-content:center;padding:24px}
+  .coach.show{display:flex}
+  .coach .cc{background:var(--panel);border-radius:24px;padding:26px 22px;max-width:340px;text-align:center;box-shadow:0 20px 50px rgba(30,20,18,.4)}
+  .coach .ce{font-size:52px}
+  .coach h4{font-family:"Baloo 2",inherit;font-size:20px;margin:8px 0 6px;color:var(--ink)}
+  .coach p{font-size:14px;color:var(--ink-soft);font-weight:600;line-height:1.4}
+  .coach .dots{display:flex;gap:6px;justify-content:center;margin:16px 0}
+  .coach .dots i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+  .coach .dots i.on{background:var(--peach)}
   @keyframes petIdle{0%,100%{transform:translateY(0) rotate(-2deg) scale(1)}50%{transform:translateY(-5px) rotate(2deg) scale(1.03)}}
   @keyframes petPop{0%{transform:translateY(0) scale(1)}35%{transform:translateY(-14px) scale(1.35) rotate(-6deg)}70%{transform:translateY(2px) scale(.94)}100%{transform:translateY(0) scale(1)}}
   @keyframes petShake{0%,100%{transform:translateX(0) rotate(0)}20%{transform:translateX(-6px) rotate(-7deg)}40%{transform:translateX(5px) rotate(6deg)}60%{transform:translateX(-4px) rotate(-4deg)}80%{transform:translateX(3px) rotate(3deg)}}
+  @media(prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+    .clouds{display:none}
+  }
+  #reportArea{display:none}
+  @media print{
+    .wrap,.lock,.cheer,#confetti,.toast,.modal,.coach{display:none !important}
+    #reportArea{display:block !important}
+  }
 </style>
 </head>
 <body>
-<div class="clouds" id="clouds"></div>
-
+<div class="clouds" id="clouds" aria-hidden="true"></div>
 <div class="wrap">
   <header>
     <div class="title"><span class="s">⭐</span> Star Squad <span class="s">⭐</span></div>
     <div class="subtitle">Tap what you did. Earn stars. Win prizes!</div>
-    <div class="revtag" id="revtag"></div>
+    <div id="bonusBanner" style="display:none;margin-top:8px;font-family:'Baloo 2',inherit;font-weight:800;font-size:14px;color:#c77b12;background:#fff3d6;border:2px solid var(--butter);border-radius:99px;padding:6px 16px"></div>
   </header>
-
-  <div class="board" id="board"></div>
-  <div class="whoseturn" id="turn"></div>
-
-  <div class="grid" id="grid"></div>
-
+  <div class="board" id="board" role="list"></div>
+  <div class="familybar" id="familybar"></div>
+  <div class="whoseturn" id="turn" aria-live="polite"></div>
+  <button class="btn" id="mysteryBtn" onclick="openMystery()" style="display:block;margin:0 auto 16px;font-size:15px;padding:12px 22px;background:var(--butter);border:none;color:#7a5a20;font-weight:800;box-shadow:0 6px 16px var(--shadow)">🎁 Open Today's Mystery Box</button>
+  <div class="grid" id="grid" role="list"></div>
+  <div class="prizebar" style="margin-top:16px">
+    <h2>🤝 Team Missions</h2>
+    <div class="prizes" id="teamMissions"></div>
+  </div>
   <div class="prizebar">
     <h2>🎁 Prize Shop</h2>
     <div class="prizes" id="prizes"></div>
   </div>
-
   <div class="footer">
-    <button class="btn" onclick="resetDay()">🔄 New Day</button>
+    <button class="btn" onclick="openStats()">📊 Stats</button>
+    <button class="btn" onclick="openBank()">🏦 Bank</button>
+    <button class="btn" onclick="openApprovals()">✅ Approvals<span id="approvalsBadge" style="display:none;margin-left:6px;background:var(--rose);color:#fff;border-radius:99px;padding:1px 7px;font-size:11px"></span></button>
+    <button class="btn" onclick="openReport()">📄 Weekly Report</button>
+    <button class="btn" id="soundBtn" onclick="toggleSound()">🔊 Sound</button>
     <button class="btn" onclick="openParent()">🔒 Grown-Up Settings</button>
+    <button class="btn" onclick="shareLink()">🔗 Share to Device</button>
     <button class="btn" onclick="backupData()">💾 Backup</button>
     <button class="btn" onclick="document.getElementById('restoreFile').click()">📂 Restore</button>
     <input type="file" id="restoreFile" accept="application/json,.json" style="display:none" onchange="restoreData(event)">
   </div>
 </div>
-
-<button class="lock" onclick="openParent()" title="Grown-up settings">⚙️</button>
-<button class="tweaksbtn" onclick="openTweaks()" title="Tweaks">🎛️</button>
-
-<div class="cheer" id="cheer"><div class="msg" id="cheerMsg">YAY!</div></div>
-<canvas id="confetti"></canvas>
-
-<!-- Parent modal -->
-<div class="modal" id="modal">
+<button class="lock" onclick="openParent()" title="Grown-up settings" aria-label="Grown-up settings">⚙️</button>
+<div class="cheer" id="cheer" aria-hidden="true"><div class="msg" id="cheerMsg">YAY!</div></div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<div class="toast" id="toast" role="status"><span id="toastMsg">Done!</span><button onclick="doUndo()">↩ Undo</button></div>
+<!-- Confirm -->
+<div class="modal" id="confirmModal" style="z-index:78" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+  <div class="card" style="max-width:320px;text-align:center">
+    <h3 id="confirmTitle">Are you sure?</h3>
+    <div class="hint" id="confirmMsg" style="margin-bottom:6px"></div>
+    <div class="row">
+      <button class="btn ghost" onclick="closeConfirm()">Cancel</button>
+      <button class="btn" id="confirmYes">Yes!</button>
+    </div>
+  </div>
+</div>
+<!-- PIN -->
+<div class="modal" id="pinModal" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
+  <div class="card" style="max-width:300px;text-align:center">
+    <h3 id="pinTitle">Enter PIN 🔒</h3>
+    <div class="hint" id="pinMsg">Grown-ups only</div>
+    <input id="pinInput" type="password" inputmode="numeric" maxlength="4" style="text-align:center;letter-spacing:8px;font-size:22px" placeholder="••••" aria-label="PIN">
+    <div class="row">
+      <button class="btn ghost" onclick="closePin()">Cancel</button>
+      <button class="btn" onclick="submitPin()">OK</button>
+    </div>
+  </div>
+</div>
+<!-- Parent -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="parentTitle">
   <div class="card">
-    <h3>Grown-Up Settings 🔒</h3>
-    <div class="hint">Names &amp; changes save only on this device.</div>
+    <h3 id="parentTitle">Grown-Up Settings 🔒</h3>
+    <div class="hint">Everything saves only on this device.</div>
     <div id="parentBody"></div>
     <div class="row">
       <button class="btn ghost" onclick="closeParent()">Close</button>
@@ -241,40 +279,58 @@
     </div>
   </div>
 </div>
-
-<!-- Pet picker modal -->
-<div class="modal" id="petModal">
+<!-- Stats -->
+<div class="modal" id="statsModal" role="dialog" aria-modal="true" aria-labelledby="statsTitle">
+  <div class="card">
+    <h3 id="statsTitle">📊 Squad Stats</h3>
+    <div class="hint">Streaks, badges, the last 2 weeks &amp; recent activity.</div>
+    <div id="statsBody"></div>
+    <div class="row"><button class="btn ghost" onclick="closeStats()">Close</button></div>
+  </div>
+</div>
+<!-- Bank -->
+<div class="modal" id="bankModal" role="dialog" aria-modal="true" aria-labelledby="bankTitle">
+  <div class="card">
+    <h3 id="bankTitle">🏦 Star Bank</h3>
+    <div class="hint">Turn stars into real money. Only grown-ups can move money.</div>
+    <div id="bankBody"></div>
+    <div class="row"><button class="btn ghost" onclick="closeBank()">Close</button></div>
+  </div>
+</div>
+<div id="reportArea" aria-hidden="true"></div>
+<!-- Approvals -->
+<div class="modal" id="approvalsModal" role="dialog" aria-modal="true" aria-labelledby="approvalsTitle">
+  <div class="card">
+    <h3 id="approvalsTitle">✅ Approvals</h3>
+    <div class="hint">Tasks kids marked done, waiting for a grown-up to confirm.</div>
+    <div id="approvalsBody"></div>
+    <div class="row"><button class="btn ghost" onclick="closeApprovals()">Close</button></div>
+  </div>
+</div>
+<!-- Pet picker -->
+<div class="modal" id="petModal" role="dialog" aria-modal="true" aria-labelledby="petTitle">
   <div class="card" style="max-width:340px">
-    <h3>Choose a Pet 🐾</h3>
+    <h3 id="petTitle">Choose a Pet 🐾</h3>
     <div class="hint">Earn stars to help your pet grow all the way up!</div>
+    <label for="petNameInput">Pet name</label>
+    <input id="petNameInput" maxlength="16" placeholder="Give your pet a name" oninput="renamePet(this.value)">
     <div class="petgrid" id="petGrid"></div>
     <div class="row"><button class="btn ghost" onclick="closePet()">Done</button></div>
   </div>
 </div>
-
-<!-- Tweaks modal -->
-<div class="modal" id="tweaksModal">
-  <div class="card" style="max-width:360px">
-    <h3>Tweaks 🎛️</h3>
-    <div class="hint">Change the whole feel of Star Squad.</div>
-    <label>Color Mood</label>
-    <div class="swatchrow" id="themeRow"></div>
-    <label>Energy</label>
-    <div class="seg" id="vibeRow"></div>
-    <label>Celebrations</label>
-    <div class="seg" id="celebRow"></div>
-    <div class="row"><button class="btn ghost" onclick="closeTweaks()">Done</button></div>
+<!-- Tutorial -->
+<div class="coach" id="coach" role="dialog" aria-modal="true" aria-labelledby="coachTitle">
+  <div class="cc">
+    <div class="ce" id="coachEmoji">⭐</div>
+    <h4 id="coachTitle">Welcome to Star Squad!</h4>
+    <p id="coachText"></p>
+    <div class="dots" id="coachDots"></div>
+    <div class="row"><button class="btn ghost" onclick="skipCoach()">Skip</button><button class="btn" id="coachNext" onclick="nextCoach()">Next</button></div>
   </div>
 </div>
-
-<div class="toast" id="toast"></div>
-
 <script>
-/* ---------- version ---------- */
-const REV = 5; // bump this on every shipped update
-const REV_DATE = "2026-07-09";
-
-/* ---------- data ---------- */
+/* ---------- constants ---------- */
+const SCHEMA = 2;
 const TILE = ["c-peach","c-butter","c-mint","c-rose","c-lilac","c-sky"];
 const PETS = [
   {key:"puppy",  name:"Puppy",     stages:["🐶","🐕"]},
@@ -284,62 +340,57 @@ const PETS = [
   {key:"avocado",name:"Avocado",   stages:["🥑","🌱","🌳"]},
   {key:"tree",   name:"Tree",      stages:["🌱","🌿","🌳"]}
 ];
-function petLabel(r){ if(r>=1)return "All grown! 🎉"; if(r>=.75)return "Almost grown!"; if(r>=.5)return "Getting big!"; if(r>=.25)return "Growing…"; if(r>0)return "Tiny baby"; return "Baby — earn stars!"; }
-function petFor(k,i,ratio){
-  const p = PETS.find(x=>x.key===k.pet) || PETS[i%PETS.length];
-  const si = Math.max(0, Math.min(p.stages.length-1, Math.floor(ratio*p.stages.length)));
-  const size = Math.round(30 + Math.min(1,ratio)*46);
-  return {emoji:p.stages[si], size, label:petLabel(ratio)};
-}
-const BAR_SETS = {
-  peach:[
-    "linear-gradient(90deg,#ffb9a3,#ffd98a)",
-    "linear-gradient(90deg,#f7a1b4,#c9b6e6)",
-    "linear-gradient(90deg,#9bd6b8,#a8cdea)",
-    "linear-gradient(90deg,#a8cdea,#9bd6b8)",
-    "linear-gradient(90deg,#c9b6e6,#f7a1b4)",
-    "linear-gradient(90deg,#ffd98a,#ffb9a3)"
-  ],
-  ocean:[
-    "linear-gradient(90deg,#7fc4c9,#ffdf9e)",
-    "linear-gradient(90deg,#8fb8d9,#a9c9e8)",
-    "linear-gradient(90deg,#8fd6c2,#7ec8e3)",
-    "linear-gradient(90deg,#7ec8e3,#8fd6c2)",
-    "linear-gradient(90deg,#a9c9e8,#8fb8d9)",
-    "linear-gradient(90deg,#ffdf9e,#7fc4c9)"
-  ],
-  berry:[
-    "linear-gradient(90deg,#ff8fab,#ffd166)",
-    "linear-gradient(90deg,#ff6f9c,#e29be0)",
-    "linear-gradient(90deg,#c99bea,#b98ee0)",
-    "linear-gradient(90deg,#b98ee0,#c99bea)",
-    "linear-gradient(90deg,#e29be0,#ff6f9c)",
-    "linear-gradient(90deg,#ffd166,#ff8fab)"
-  ]
-};
-const THEMES = {
-  peach:{ label:"Peach Cozy", dots:["#ffb9a3","#9bd6b8","#c9b6e6"], confetti:["#ffb9a3","#f7a1b4","#9bd6b8","#a8cdea","#c9b6e6","#ffd98a"], vars:{
-    "--bg":"#fdf3ea","--bg2":"#fbe7dd","--panel-soft":"#fff6f0","--glow1":"#fff5ec","--glow2":"#fbe4ec",
-    "--peach":"#ffb9a3","--rose":"#f7a1b4","--mint":"#9bd6b8","--sky":"#a8cdea","--lilac":"#c9b6e6","--butter":"#ffd98a","--line":"#f0e2d8","--star":"#f6b23f",
-    "--tile-peach":"#ffcdbb","--tile-rose":"#f9c1cf","--tile-mint":"#bfe6d0","--tile-sky":"#c4ddf1","--tile-lilac":"#ddccf0","--tile-butter":"#ffe6ad"
-  }},
-  ocean:{ label:"Ocean Calm", dots:["#7fc4c9","#8fb8d9","#ffdf9e"], confetti:["#7fc4c9","#8fb8d9","#8fd6c2","#7ec8e3","#a9c9e8","#ffdf9e"], vars:{
-    "--bg":"#eef6f8","--bg2":"#e3f0f3","--panel-soft":"#f2fafb","--glow1":"#f4fbfc","--glow2":"#e6f3f7",
-    "--peach":"#7fc4c9","--rose":"#8fb8d9","--mint":"#8fd6c2","--sky":"#7ec8e3","--lilac":"#a9c9e8","--butter":"#ffdf9e","--line":"#dcebee","--star":"#4fa8b0",
-    "--tile-peach":"#bfe3e6","--tile-rose":"#c7dcf0","--tile-mint":"#c3ecdf","--tile-sky":"#c8e8f5","--tile-lilac":"#d3e2f2","--tile-butter":"#ffedc2"
-  }},
-  berry:{ label:"Berry Pop", dots:["#ff6f9c","#c99bea","#ffd166"], confetti:["#ff8fab","#ff6f9c","#c99bea","#b98ee0","#e29be0","#ffd166"], vars:{
-    "--bg":"#fdf0f5","--bg2":"#fbe1ec","--panel-soft":"#fff5fa","--glow1":"#fff0f6","--glow2":"#f7e0f5",
-    "--peach":"#ff8fab","--rose":"#ff6f9c","--mint":"#c99bea","--sky":"#b98ee0","--lilac":"#e29be0","--butter":"#ffd166","--line":"#f5d9e6","--star":"#ff5f96",
-    "--tile-peach":"#ffc2d1","--tile-rose":"#ffb8cf","--tile-mint":"#e6c2f0","--tile-sky":"#dcc2f5","--tile-lilac":"#f0c7ec","--tile-butter":"#ffe1a3"
-  }}
-};
-let barGrads = BAR_SETS.peach;
-let confettiColors = THEMES.peach.confetti;
+const AVATAR_CHOICES = ["🦁","🐯","🐻","🦊","🐨","🐸","🐵","🦄","🐙","🐢","🐰","🐼","🦖","🐳","🦉","🐝","🦋","🐧","🦩","🐬","🌟","🚀","🦕","🐲"];
+const THEMES = [
+  {key:"auto",  name:"Auto",  sw:"linear-gradient(90deg,#fff,#191d2e)"},
+  {key:"light", name:"Peach", sw:"#ffb9a3"},
+  {key:"dark",  name:"Night", sw:"#191d2e"},
+  {key:"ocean", name:"Ocean", sw:"#6fc0d9"},
+  {key:"berry", name:"Berry", sw:"#e58bbf"}
+];
+const BAR_GRADS = [
+  "linear-gradient(90deg,#ffb9a3,#ffd98a)","linear-gradient(90deg,#f7a1b4,#c9b6e6)",
+  "linear-gradient(90deg,#9bd6b8,#a8cdea)","linear-gradient(90deg,#a8cdea,#9bd6b8)",
+  "linear-gradient(90deg,#c9b6e6,#f7a1b4)","linear-gradient(90deg,#ffd98a,#ffb9a3)"
+];
+const BADGES = [
+  {key:"first",   emoji:"🌟", name:"First Star",   test:k=>(k.lifetimePoints||0)>=5},
+  {key:"fifty",   emoji:"🏅", name:"50 Club",      test:k=>(k.lifetimePoints||0)>=50},
+  {key:"hundred", emoji:"💯", name:"Century",      test:k=>(k.lifetimePoints||0)>=100},
+  {key:"legend",  emoji:"👑", name:"500 Legend",   test:k=>(k.lifetimePoints||0)>=500},
+  {key:"streak3", emoji:"🔥", name:"3-Day Streak", test:k=>streakOf(k)>=3},
+  {key:"streak7", emoji:"⚡", name:"Week Warrior", test:k=>streakOf(k)>=7},
+  {key:"busy",    emoji:"🐝", name:"Busy Bee",     test:k=>(k.lifetimeTasks||0)>=50},
+  {key:"grown",   emoji:"🎉", name:"Pet Grown",    test:k=>k.points/(k.goal||1)>=1},
+  {key:"spring",  emoji:"🌷", name:"Spring Bloom", season:[3,4,5],   test:k=>(k.lifetimePoints||0)>=10},
+  {key:"summer",  emoji:"🏖️", name:"Summer Star",  season:[6,7,8],   test:k=>(k.lifetimePoints||0)>=10},
+  {key:"autumn",  emoji:"🍁", name:"Fall Leaf",    season:[9,10,11], test:k=>(k.lifetimePoints||0)>=10},
+  {key:"winter",  emoji:"❄️", name:"Winter Wonder",season:[12,1,2],  test:k=>(k.lifetimePoints||0)>=10}
+];
+const COACH = [
+  {e:"⭐", t:"Welcome to Star Squad!", p:"A friendly chart where kids earn stars for good habits — and grow a pet along the way."},
+  {e:"👆", t:"Tap a task", p:"Pick whose turn it is at the top, then tap the big buttons for anything they did. Each tap adds stars!"},
+  {e:"🐾", t:"Grow your pet", p:"Stars help each kid's pet grow and stay happy. Tap the pet to name it or pick a new one."},
+  {e:"🎁", t:"Win prizes", p:"Spend stars in the Prize Shop. Grown-ups can add kids, tasks, prizes, a PIN and more in Settings."}
+];
 const DEFAULT = {
+  version:SCHEMA,
+  settings:{sound:true,haptics:true,theme:"auto",pin:"",reminders:[],starsPerDollar:15,syncCode:"",requireApproval:false},
+  familyGoal:{emoji:"🍕",name:"Family Movie Night",target:150},
+  familyProgress:0,
+  activity:[],
+  pending:[],
+  redemptions:[],
+  coopTasks:[
+    {emoji:"🧹",label:"Tidy Together",bonus:15},
+    {emoji:"🍽️",label:"Set the Table",bonus:10}
+  ],
+  coopDone:{},
+  bonusDay:"",
+  lastDay:null,
   kids:[
-    {name:"Kid 1", avatar:"🦁", points:0, today:0, bank:0, goal:50, pet:"puppy"},
-    {name:"Kid 2", avatar:"🐯", points:0, today:0, bank:0, goal:50, pet:"kitten"}
+    {name:"Kid 1", avatar:"🦁", points:0, goal:50, weeklyGoal:100, pet:"puppy",  petName:"", counts:{}, history:{}, todayEarned:0, lifetimePoints:0, lifetimeTasks:0, happiness:60, badges:[]},
+    {name:"Kid 2", avatar:"🐯", points:0, goal:50, weeklyGoal:100, pet:"kitten", petName:"", counts:{}, history:{}, todayEarned:0, lifetimePoints:0, lifetimeTasks:0, happiness:60, badges:[]}
   ],
   tasks:[
     {emoji:"🦷", label:"Brush Teeth", val:5, color:"c-sky"},
@@ -352,218 +403,623 @@ const DEFAULT = {
     {emoji:"👟", label:"Shoes On", val:5, color:"c-mint"}
   ],
   prizes:[
-    {emoji:"🍦", name:"Ice Cream", cost:20},
-    {emoji:"📺", name:"Show Time", cost:30},
-    {emoji:"🎮", name:"Game Time", cost:40},
-    {emoji:"🏞️", name:"Park Trip", cost:60},
+    {emoji:"🍦", name:"Ice Cream", cost:20},{emoji:"📺", name:"Show Time", cost:30},
+    {emoji:"🎮", name:"Game Time", cost:40},{emoji:"🏞️", name:"Park Trip", cost:60},
     {emoji:"🧁", name:"Bake Day", cost:80}
-  ],
-  tweaks:{theme:"peach", vibe:"playful", celebration:"big"}
+  ]
 };
+/* ---------- date helpers (local) ---------- */
+function fmt(dt){const y=dt.getFullYear(),m=String(dt.getMonth()+1).padStart(2,'0'),d=String(dt.getDate()).padStart(2,'0');return `${y}-${m}-${d}`;}
+function parseYMD(s){const p=String(s).split("-");return new Date(+p[0],(+p[1])-1,+p[2]);}
+const TODAY = ()=>fmt(new Date());
 let S = load();
-let active = 0; // whose turn is tapping
-
+let active = 0;
+let parentUnlocked = false;
+const REDUCE = (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+/* ---------- storage ---------- */
+function migrateKid(k){
+  k.counts=k.counts||{}; k.history=k.history||{}; k.todayEarned=k.todayEarned||0;
+  k.lifetimePoints=(typeof k.lifetimePoints==='number')?k.lifetimePoints:(k.points||0);
+  k.lifetimeTasks=k.lifetimeTasks||0; k.happiness=(typeof k.happiness==='number')?k.happiness:60;
+  k.badges=k.badges||[]; k.petName=k.petName||""; k.weeklyGoal=k.weeklyGoal||100;
+  k.bank=(typeof k.bank==='number')?k.bank:0;
+  k.lastMystery=k.lastMystery||"";
+  return k;
+}
+function migrate(d){
+  d.settings=Object.assign({sound:true,haptics:true,theme:"auto",pin:"",reminders:[],starsPerDollar:15,syncCode:"",requireApproval:false}, d.settings||{});
+  if(d.settings.syncCode && !/^[a-zA-Z0-9-]{6,40}$/.test(d.settings.syncCode)) d.settings.syncCode="";
+  if(typeof d.settings.starsPerDollar!=='number'||d.settings.starsPerDollar<1){ d.settings.starsPerDollar=15; }
+  d.familyGoal=d.familyGoal||{emoji:"🍕",name:"Family Movie Night",target:150};
+  d.familyProgress=d.familyProgress||0; d.activity=d.activity||[]; d.pending=d.pending||[]; d.redemptions=d.redemptions||[];
+  d.coopTasks=d.coopTasks||[{emoji:"🧹",label:"Tidy Together",bonus:15},{emoji:"🍽️",label:"Set the Table",bonus:10}];
+  d.coopDone=d.coopDone||{}; d.bonusDay=d.bonusDay||"";
+  d.lastDay=d.lastDay||TODAY(); d.version=SCHEMA;
+  (d.kids||[]).forEach(migrateKid);
+  return d;
+}
 function load(){
-  try{
-    const d = JSON.parse(localStorage.getItem("starSquad"));
-    if(d&&d.kids&&d.kids.length){
-      d.kids.forEach(k=>{ if(typeof k.today!=="number") k.today=0; if(typeof k.bank!=="number") k.bank=0; });
-      if(!d.tweaks) d.tweaks={theme:"peach", vibe:"playful", celebration:"big"};
-      return d;
-    }
+  try{ const d=JSON.parse(localStorage.getItem("starSquad"));
+    if(d&&d.kids&&d.kids.length) return migrate(d);
   }catch(e){}
-  return JSON.parse(JSON.stringify(DEFAULT));
+  return migrate(JSON.parse(JSON.stringify(DEFAULT)));
 }
-function applyTheme(key){
-  const t = THEMES[key] || THEMES.peach;
-  Object.entries(t.vars).forEach(([k,v])=>document.documentElement.style.setProperty(k,v));
-  barGrads = BAR_SETS[key] || BAR_SETS.peach;
-  confettiColors = t.confetti;
-}
-function applyVibe(v){ document.body.classList.toggle("chill", v==="chill"); }
-function save(){ try{localStorage.setItem("starSquad",JSON.stringify(S))}catch(e){} }
+function save(){ S.updatedAt=Date.now(); try{localStorage.setItem("starSquad",JSON.stringify(S))}catch(e){} schedulePush(); }
 function clampActive(){ if(active>=S.kids.length) active=S.kids.length-1; if(active<0) active=0; }
-
+/* ---------- activity log ---------- */
+function logAct(type,kidName,text){
+  S.activity.unshift({t:Date.now(),type,kid:kidName,text});
+  if(S.activity.length>60) S.activity.length=60;
+}
+/* ---------- streaks / weekly ---------- */
+function streakOf(k){
+  const days=new Set(Object.keys(k.history||{}).filter(d=>k.history[d]>0));
+  if((k.todayEarned||0)>0) days.add(TODAY());
+  let streak=0; const d=new Date();
+  if(!days.has(fmt(d))) d.setDate(d.getDate()-1);
+  while(days.has(fmt(d))){ streak++; d.setDate(d.getDate()-1); }
+  return streak;
+}
+function bestStreak(k){
+  const days=Object.keys(k.history||{}).filter(d=>k.history[d]>0);
+  if((k.todayEarned||0)>0) days.push(TODAY());
+  const set=new Set(days); let best=0;
+  set.forEach(d=>{
+    const prev=parseYMD(d); prev.setDate(prev.getDate()-1);
+    if(set.has(fmt(prev))) return;
+    let run=0,c=parseYMD(d);
+    while(set.has(fmt(c))){run++;c.setDate(c.getDate()+1);}
+    if(run>best)best=run;
+  });
+  return best;
+}
+function weekEarned(k){
+  let sum=k.todayEarned||0; const d=new Date();
+  for(let i=1;i<7;i++){ d.setDate(d.getDate()-1); sum+=(k.history[fmt(d)]||0); }
+  return sum;
+}
+/* ---------- auto rollover ---------- */
+function autoRollover(){
+  const today=TODAY();
+  if(S.lastDay===today) return false;
+  const bankDay=S.lastDay||today;
+  S.kids.forEach(k=>{
+    if((k.todayEarned||0)>0){ k.history[bankDay]=(k.history[bankDay]||0)+k.todayEarned; }
+    k.todayEarned=0; k.counts={}; k.done=[];
+    k.happiness=Math.max(20,(k.happiness||60)-10);
+  });
+  S.lastDay=today;
+  if(Math.random()<1/6) S.bonusDay=today;
+  save();
+  return true;
+}
+/* ---------- theme ---------- */
+function applyTheme(){
+  const t=(S.settings.theme)||"auto";
+  let dt=t;
+  if(t==="auto") dt=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?"dark":"light";
+  if(dt==="light") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme",dt);
+  const colors={light:"#fdf3ea",dark:"#191d2e",ocean:"#eef6fc",berry:"#faeef6"};
+  const meta=document.getElementById("themeColorMeta"); if(meta) meta.setAttribute("content",colors[dt]||"#fdf3ea");
+}
+if(window.matchMedia){ try{ matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{ if(S.settings.theme==='auto'){applyTheme();} }); }catch(e){} }
 /* ---------- render ---------- */
+function heartStr(h){ const full=Math.round(Math.max(0,Math.min(100,h))/20); return "❤️".repeat(full)+"🤍".repeat(5-full); }
+function money(n){ return "$"+(n).toFixed(2); }
 function render(){
   clampActive();
-  const board = document.getElementById("board");
-  const points = S.kids.map(k=>k.points);
-  const max = Math.max(...points);
-  const leaders = points.filter(p=>p===max).length;
-  board.innerHTML = S.kids.map((k,i)=>{
-    const pct = Math.min(100, Math.round(k.points/(k.goal||1)*100));
-    const winning = k.points===max && max>0 && leaders===1;
-    const bar = barGrads[i % barGrads.length];
-    const ratio = Math.min(1.15, k.points/(k.goal||1));
-    const pet = petFor(k,i,ratio);
-    return `<div class="kid ${i===active?'active':''} ${winning?'winning':''}">
-      <div class="lead">👑</div>
-      <div class="bank ${k.points<=0?'empty':''}" onclick="event.stopPropagation();bankIt(${i})" title="Tap to bank your ${k.points} unspent stars">🏦 ${k.bank||0}</div>
-      <div class="selectzone" onclick="setActive(${i})">
-        <div class="avatar">${esc(k.avatar)}</div>
-        <div class="name">${esc(k.name)}</div>
-        <div class="pts">${k.points}<small> / ${k.goal} ⭐</small></div>
-        <div class="barwrap"><div class="bar" style="width:${pct}%;background:${bar}"></div></div>
-        <div class="goaltxt">${k.goal-k.points>0?(k.goal-k.points)+" to go!":"Goal smashed! 🎉"}</div>
-      </div>
-      <div class="petzone"><span class="pet" style="font-size:${pet.size}px" onclick="event.stopPropagation();openPet(${i})" title="Tap to choose a pet">${pet.emoji}</span></div>
-      <div class="petstage">${pet.label} · tap to change</div>
+  const board=document.getElementById("board");
+  const points=S.kids.map(k=>k.points);
+  const max=Math.max(...points);
+  const leaders=points.filter(p=>p===max).length;
+  board.innerHTML=S.kids.map((k,i)=>{
+    const pct=Math.min(100,Math.round(k.points/(k.goal||1)*100));
+    const winning=k.points===max&&max>0&&leaders===1;
+    const bar=BAR_GRADS[i%BAR_GRADS.length];
+    const ratio=Math.min(1.15,k.points/(k.goal||1));
+    const pet=petFor(k,i,ratio);
+    const st=streakOf(k);
+    const wk=weekEarned(k), wkPct=Math.min(100,Math.round(wk/(k.weeklyGoal||1)*100));
+    const badgeIcons=(k.badges||[]).map(bk=>{const b=BADGES.find(x=>x.key===bk);return b?`<span title="${b.name}">${b.emoji}</span>`:"";}).join("");
+    const petNm=k.petName?esc(k.petName):pet.label;
+    const cash=`<div class="cash">🏦 ${money(k.bank||0)} in bank</div>`;
+    return `<div class="kid ${i===active?'active':''} ${winning?'winning':''}" role="listitem" tabindex="0" aria-label="${esc(k.name)}, ${k.points} of ${k.goal} stars${st>=2?', '+st+' day streak':''}" onclick="setActive(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();setActive(${i});}">
+      <div class="lead" aria-hidden="true">👑</div>
+      <div class="streak ${st>=2?'on':''}" aria-hidden="true">🔥 ${st}</div>
+      <div class="avatar" aria-hidden="true">${esc(k.avatar)}</div>
+      <div class="name">${esc(k.name)}</div>
+      <div class="petzone"><span class="pet" style="font-size:${pet.size}px" role="button" tabindex="0" aria-label="Pet ${esc(k.petName||pet.label)}, tap to feed or change" onclick="event.stopPropagation();openPet(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();openPet(${i});}">${pet.emoji}</span></div>
+      <div class="petname">${petNm}</div>
+      <div class="petstage">${k.petName?pet.label:'tap pet to name/feed'}</div>
+      <div class="hearts" aria-hidden="true">${heartStr(k.happiness)}</div>
+      <div class="pts">${k.points}<small> / ${k.goal} ⭐</small></div>
+      ${cash}
+      <div class="barwrap"><div class="bar" style="width:${pct}%;background:${bar}"></div></div>
+      <div class="goaltxt">${k.goal-k.points>0?(k.goal-k.points)+" to go!":"Goal smashed! 🎉"}</div>
+      <div class="weekwrap"><div class="weekbar" style="width:${wkPct}%"></div></div>
+      <div class="weektxt">This week: ${wk}/${k.weeklyGoal} ⭐</div>
+      <div class="badges" aria-hidden="true">${badgeIcons}</div>
     </div>`;
   }).join("");
-
-  document.getElementById("turn").innerHTML =
-    `Tapping for: <b>${esc(S.kids[active].avatar)} ${esc(S.kids[active].name)}</b>${S.kids.length>1?" (tap another name to switch)":""}`;
-
-  const counts = S.kids[active].counts || {};
-  document.getElementById("grid").innerHTML = S.tasks.map((t,i)=>{
-    const cnt = counts[i]||0;
-    return `
-    <button class="task ${TILE[i % TILE.length]}" onclick="doTask(${i})">
-      <span class="val">+${t.val}</span>
-      ${cnt>0?`<span class="cnt">×${cnt}</span>`:``}
-      <span class="emoji">${esc(t.emoji)}</span>
+  renderFamily();
+  document.getElementById("turn").innerHTML=`Tapping for: <b>${esc(S.kids[active].avatar)} ${esc(S.kids[active].name)}</b>${S.kids.length>1?" (tap another name to switch)":""}`;
+  const counts=S.kids[active].counts||{};
+  document.getElementById("grid").innerHTML=S.tasks.map((t,i)=>{
+    const cnt=counts[i]||0;
+    return `<button class="task ${TILE[i%TILE.length]}" role="listitem" aria-label="${esc(t.label)}, plus ${t.val} stars${cnt>0?', done '+cnt+' times today':''}" onclick="doTask(${i})">
+      <span class="val" aria-hidden="true">+${t.val}</span>
+      ${cnt>0?`<span class="cnt" aria-hidden="true">×${cnt}</span>`:``}
+      <span class="emoji" aria-hidden="true">${esc(t.emoji)}</span>
       <span class="lbl">${esc(t.label)}</span>
     </button>`;
   }).join("");
-
-  const pts = S.kids[active].points + (S.kids[active].bank||0);
-  document.getElementById("prizes").innerHTML = S.prizes.map((p,i)=>`
+  const pts=S.kids[active].points;
+  document.getElementById("prizes").innerHTML=S.prizes.map((p,i)=>`
     <div class="prize ${pts>=p.cost?'ready':''}">
-      <div class="pe">${esc(p.emoji)}</div>
+      <div class="pe" aria-hidden="true">${esc(p.emoji)}</div>
       <div class="pn">${esc(p.name)}</div>
       <div class="pc">${p.cost} ⭐</div>
-      <button class="redeem" onclick="redeem(${i})">Get it!</button>
+      <button class="redeem" aria-label="Redeem ${esc(p.name)} for ${p.cost} stars" onclick="redeem(${i})">Get it!</button>
     </div>`).join("");
-
+  const sb=document.getElementById("soundBtn"); if(sb) sb.textContent=(S.settings.sound?"🔊":"🔇")+" Sound";
+  renderApprovalBadge();
+  const bb=document.getElementById("bonusBanner");
+  if(bb){ const isBonus=S.bonusDay===TODAY(); bb.style.display=isBonus?"inline-block":"none"; if(isBonus) bb.textContent="✨ DOUBLE STAR DAY! Every task pays 2x today! ✨"; }
+  const mb=document.getElementById("mysteryBtn");
+  if(mb){ const openToday=S.kids[active].lastMystery!==TODAY(); mb.disabled=!openToday; mb.textContent=openToday?"🎁 Open Today's Mystery Box":"🎁 Opened — see you tomorrow!"; mb.style.opacity=openToday?1:.55; }
+  renderTeam();
   save();
 }
-function esc(s){return String(s).replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]))}
-
+function renderFamily(){
+  const fg=S.familyGoal||{}; const prog=S.familyProgress||0;
+  const pct=Math.min(100,Math.round(prog/(fg.target||1)*100));
+  const ready=prog>=fg.target;
+  const el=document.getElementById("familybar");
+  el.className="familybar"+(ready?" ready":"");
+  el.innerHTML=`<div class="ft">${esc(fg.emoji||"🎯")} Family Goal: ${esc(fg.name||"")}</div>
+    <div class="fwrap"><div class="fbar" style="width:${pct}%"></div></div>
+    <div class="fsub">${prog} / ${fg.target} ⭐ together${ready?" — unlocked!":""}</div>
+    <button class="fredeem" onclick="redeemFamily()">🎉 Claim ${esc(fg.name||"reward")}</button>`;
+}
+function esc(s){return String(s).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]))}
+function petLabel(r){ if(r>=1)return "All grown! 🎉"; if(r>=.75)return "Almost grown!"; if(r>=.5)return "Getting big!"; if(r>=.25)return "Growing…"; if(r>0)return "Tiny baby"; return "Baby — earn stars!"; }
+function petFor(k,i,ratio){
+  const p=PETS.find(x=>x.key===k.pet)||PETS[i%PETS.length];
+  const si=Math.max(0,Math.min(p.stages.length-1,Math.floor(ratio*p.stages.length)));
+  const size=Math.round(30+Math.min(1,ratio)*46);
+  return {emoji:p.stages[si],size,label:petLabel(ratio)};
+}
 function setActive(i){ active=i; render(); }
-
 function petAnim(anim){
-  const p=document.querySelector('.kid.active .pet');
-  if(!p)return;
-  p.style.animation='none'; void p.offsetWidth;
-  p.style.animation=anim;
+  if(REDUCE) return;
+  const p=document.querySelector('.kid.active .pet'); if(!p)return;
+  p.style.animation='none'; void p.offsetWidth; p.style.animation=anim;
   p.addEventListener('animationend',()=>{p.style.animation='';},{once:true});
 }
-
+function haptic(ms){ if(S.settings.haptics && navigator.vibrate){ try{navigator.vibrate(ms||15);}catch(e){} } }
+/* ---------- badges ---------- */
+function checkBadges(i){
+  const k=S.kids[i]; k.badges=k.badges||[]; const mo=new Date().getMonth()+1; const unlocked=[];
+  BADGES.forEach(b=>{
+    if(k.badges.includes(b.key)) return;
+    if(b.season && b.season.indexOf(mo)<0) return;
+    if(b.test(k)){ k.badges.push(b.key); unlocked.push(b); }
+  });
+  return unlocked;
+}
+/* ---------- undo ---------- */
+let undoSnap=null, undoTimer=null;
+function snapshot(i){
+  const k=S.kids[i];
+  return {i, fam:S.familyProgress, d:JSON.parse(JSON.stringify({points:k.points,todayEarned:k.todayEarned,lifetimePoints:k.lifetimePoints,lifetimeTasks:k.lifetimeTasks,happiness:k.happiness,counts:k.counts,badges:k.badges}))};
+}
+function showUndo(msg){
+  const t=document.getElementById("toast");
+  document.getElementById("toastMsg").textContent=msg;
+  t.classList.add("show");
+  clearTimeout(undoTimer);
+  undoTimer=setTimeout(()=>{ t.classList.remove("show"); undoSnap=null; },5000);
+}
+function doUndo(){
+  if(!undoSnap) return;
+  const k=S.kids[undoSnap.i]; Object.assign(k,undoSnap.d); S.familyProgress=undoSnap.fam;
+  undoSnap=null; document.getElementById("toast").classList.remove("show"); clearTimeout(undoTimer);
+  render(); ding();
+}
+/* ---------- confirm ---------- */
+let confirmCb=null;
+function confirmBox(title,msg,onYes){
+  document.getElementById("confirmTitle").textContent=title;
+  document.getElementById("confirmMsg").textContent=msg;
+  confirmCb=onYes; openM("confirmModal");
+}
+function closeConfirm(){ closeM("confirmModal"); confirmCb=null; }
+document.getElementById("confirmYes").addEventListener("click",()=>{ const cb=confirmCb; closeConfirm(); if(cb)cb(); });
 /* ---------- actions ---------- */
-const CHEERS=["YAY!","AWESOME!","WOOHOO!","SUPERSTAR!","NICE!","AMAZING!","GO YOU!","HIGH FIVE!"];
 function doTask(i){
-  const k = S.kids[active];
-  k.counts = k.counts || {};
-  k.counts[i] = (k.counts[i]||0)+1;
-  k.points += S.tasks[i].val;
-  feedback(CHEERS[Math.floor(Math.random()*CHEERS.length)]);
-  render();
-  petAnim('petPop .6s ease');
+  const k=S.kids[active];
+  if(S.settings.requireApproval){
+    S.pending.push({id:Date.now()+Math.random(),kidIdx:active,kidName:k.name,taskIdx:i,taskLabel:S.tasks[i].label,taskEmoji:S.tasks[i].emoji,val:S.tasks[i].val,ts:Date.now()});
+    save(); renderApprovalBadge(); haptic(10); ding();
+    toastMsgOnly(`⏳ Sent "${S.tasks[i].label}" for approval`);
+    return;
+  }
+  undoSnap=snapshot(active);
+  const r=creditTask(active,i);
+  haptic(15); ding(); render(); petAnim('petPop .6s ease');
+  if(r.crossedGoal) goalCelebrate(k);
+  else if(r.newBadges.length){ celebrate(r.newBadges[0].emoji+" "+r.newBadges[0].name.toUpperCase()+"!"); ding(true); }
+  else celebrate(CHEERS[Math.floor(Math.random()*CHEERS.length)]);
+  showUndo(`+${r.val}⭐ for ${k.name}`);
+}
+function creditTask(kidIdx,i){
+  const k=S.kids[kidIdx], task=S.tasks[i];
+  if(!task) return {val:0,crossedGoal:false,newBadges:[]};
+  k.counts=k.counts||{}; k.counts[i]=(k.counts[i]||0)+1;
+  const before=k.points, mult=(S.bonusDay===TODAY())?2:1, val=task.val*mult;
+  k.points+=val; k.todayEarned=(k.todayEarned||0)+val;
+  k.lifetimePoints=(k.lifetimePoints||0)+val; k.lifetimeTasks=(k.lifetimeTasks||0)+1;
+  k.happiness=Math.min(100,(k.happiness||60)+6);
+  S.familyProgress=(S.familyProgress||0)+val;
+  const crossedGoal=before<k.goal && k.points>=k.goal;
+  const newBadges=checkBadges(kidIdx);
+  logAct("earn",k.name,`+${val}⭐ ${task.label}${mult>1?' (2x!)':''}`);
+  return {val,crossedGoal,newBadges};
+}
+/* ---------- approvals ---------- */
+function renderApprovalBadge(){
+  const b=document.getElementById("approvalsBadge"); if(!b) return;
+  const n=(S.pending||[]).length; b.style.display=n?"inline-block":"none"; b.textContent=n;
+}
+function openApprovals(){ renderApprovals(); openM("approvalsModal"); }
+function closeApprovals(){ closeM("approvalsModal"); }
+function renderApprovals(){
+  document.getElementById("approvalsBody").innerHTML=(S.pending||[]).length?S.pending.map(p=>`
+    <div class="kidedit">
+      <div class="kidhead"><b>${esc(p.taskEmoji)} ${esc(p.taskLabel)}</b><span style="font-weight:800;color:var(--star)">+${p.val}⭐</span></div>
+      <div class="hint" style="margin:2px 0 8px">${esc(p.kidName)} · ${timeAgo(p.ts)} ago</div>
+      <textarea data-note-for="${p.id}" placeholder="Add a note (optional) — what happened, how it went…" style="width:100%;padding:9px 11px;border-radius:12px;border:2px solid var(--line);background:var(--panel);color:var(--ink);font-family:inherit;font-size:13px;resize:vertical;min-height:44px"></textarea>
+      <div class="bonusrow">
+        <button type="button" class="bb cash" onclick="approvePending(${JSON.stringify(p.id)})">✅ Approve</button>
+        <button type="button" class="bb" style="background:var(--rose);color:#7a2f42" onclick="rejectPending(${JSON.stringify(p.id)})">✖ Decline</button>
+      </div>
+    </div>`).join(""):`<div class="hint">No pending approvals. 🎉</div>`;
+}
+function approvePending(id){
+  const idx=S.pending.findIndex(p=>p.id===id); if(idx<0) return;
+  const p=S.pending[idx]; S.pending.splice(idx,1);
+  const noteEl=document.querySelector(`[data-note-for="${id}"]`); const note=noteEl?noteEl.value.trim():"";
+  active=p.kidIdx; clampActive();
+  const k=S.kids[active];
+  undoSnap=snapshot(active);
+  const r=creditTask(active,p.taskIdx);
+  if(note) logAct("note",k.name,`📝 ${note} (${p.taskEmoji} ${p.taskLabel})`);
+  save(); renderApprovals(); renderApprovalBadge(); render();
+  if(r.crossedGoal) goalCelebrate(k); else celebrate("✅ APPROVED! +"+r.val+"⭐");
+  ding(true); haptic(15);
+}
+function rejectPending(id){
+  const idx=S.pending.findIndex(p=>p.id===id); if(idx<0) return;
+  const p=S.pending[idx]; S.pending.splice(idx,1);
+  const noteEl=document.querySelector(`[data-note-for="${id}"]`); const note=noteEl?noteEl.value.trim():"";
+  logAct("declined",p.kidName,`Declined: ${p.taskEmoji} ${p.taskLabel}${note?' — '+note:''}`);
+  save(); renderApprovals(); renderApprovalBadge();
+}
+function toggleApproval(){ readAllEdits(); S.settings.requireApproval=!S.settings.requireApproval; renderParent(); }
+/* ---------- mystery box ---------- */
+const MYSTERY_REWARDS=[
+  {emoji:"⭐",label:"A shiny star",stars:3,w:30},
+  {emoji:"✨",label:"Sparkle bonus",stars:5,w:25},
+  {emoji:"🍀",label:"Lucky find",stars:6,w:20},
+  {emoji:"🌈",label:"Rainbow surprise",stars:8,w:12},
+  {emoji:"🎉",label:"Party bonus",stars:12,w:8},
+  {emoji:"💎",label:"JACKPOT",stars:20,w:5}
+];
+function pickMystery(){
+  const total=MYSTERY_REWARDS.reduce((s,r)=>s+r.w,0); let r=Math.random()*total;
+  for(const item of MYSTERY_REWARDS){ if(r<item.w) return item; r-=item.w; }
+  return MYSTERY_REWARDS[0];
+}
+function openMystery(){
+  const k=S.kids[active];
+  if(k.lastMystery===TODAY()){ toastMsgOnly("🎁 Already opened today — come back tomorrow!"); return; }
+  const btn=document.getElementById("mysteryBtn");
+  if(btn){ btn.disabled=true; if(!REDUCE) btn.style.animation="petShake .5s ease"; }
+  haptic(10); ding();
+  setTimeout(()=>{
+    const reward=pickMystery();
+    k.lastMystery=TODAY();
+    k.points+=reward.stars; k.todayEarned=(k.todayEarned||0)+reward.stars; k.lifetimePoints=(k.lifetimePoints||0)+reward.stars;
+    S.familyProgress=(S.familyProgress||0)+reward.stars;
+    logAct("mystery",k.name,`${reward.emoji} ${reward.label} (+${reward.stars}⭐)`);
+    checkBadges(active); save(); render();
+    celebrate(reward.emoji+" "+reward.label.toUpperCase()+"! +"+reward.stars+"⭐");
+    fireConfetti(reward.stars>=15?160:90); ding(true); haptic([15,40,15]);
+  },550);
+}
+/* ---------- team missions (sibling co-op) ---------- */
+function renderTeam(){
+  const el=document.getElementById("teamMissions"); if(!el) return;
+  const today=TODAY();
+  const doneToday=(S.coopDone&&S.coopDone[today])||{};
+  el.innerHTML=(S.coopTasks||[]).length?S.coopTasks.map((t,i)=>{
+    const joined=doneToday[i]||[];
+    const allIn=joined.length>=S.kids.length;
+    const iJoined=joined.includes(active);
+    const avatars=S.kids.map((k,ki)=>`<span style="opacity:${joined.includes(ki)?1:.25};font-size:20px" title="${esc(k.name)}">${esc(k.avatar)}</span>`).join(" ");
+    return `<div class="prize" style="min-width:150px;${allIn?'border-color:var(--mint)':''}">
+      <div class="pe" aria-hidden="true">${esc(t.emoji)}</div>
+      <div class="pn">${esc(t.label)}</div>
+      <div class="pc">+${t.bonus}⭐ each</div>
+      <div style="margin:6px 0">${avatars}</div>
+      <button class="redeem" style="opacity:1;pointer-events:${allIn||iJoined?'none':'auto'};${allIn?'background:var(--mint)':iJoined?'opacity:.5':''}" onclick="joinTeamTask(${i})">${allIn?'Done today! 🎉':iJoined?'Waiting for others…':'We did it!'}</button>
+    </div>`;
+  }).join(""):`<div class="hint">No team missions yet — add some in Grown-Up Settings.</div>`;
+}
+function joinTeamTask(i){
+  const today=TODAY(); S.coopDone=S.coopDone||{}; S.coopDone[today]=S.coopDone[today]||{};
+  const list=S.coopDone[today][i]=S.coopDone[today][i]||[];
+  if(list.includes(active)) return;
+  list.push(active);
+  const t=S.coopTasks[i], k=S.kids[active];
+  logAct("team",k.name,`🤝 Joined: ${t.emoji} ${t.label}`);
+  haptic(10); ding();
+  if(list.length>=S.kids.length){
+    S.kids.forEach((kk,ki)=>{ kk.points+=t.bonus; kk.todayEarned=(kk.todayEarned||0)+t.bonus; kk.lifetimePoints=(kk.lifetimePoints||0)+t.bonus; checkBadges(ki); });
+    S.familyProgress=(S.familyProgress||0)+t.bonus*S.kids.length;
+    logAct("team","Squad",`🎉 TEAM UP! ${t.emoji} ${t.label} — everyone +${t.bonus}⭐`);
+    celebrate("🤝 TEAM UP! +"+t.bonus+"⭐ EACH!"); fireConfetti(160); ding("fanfare"); haptic([20,60,20,60,20]);
+  } else { celebrate(esc(k.name)+" JOINED IN!"); }
+  save(); render();
 }
 function redeem(i){
-  const p = S.prizes[i], k = S.kids[active];
-  const total = k.points + (k.bank||0);
-  if(total < p.cost) return;
-  let remaining = p.cost;
-  const fromPoints = Math.min(k.points, remaining);
-  k.points -= fromPoints;
-  remaining -= fromPoints;
-  k.bank = (k.bank||0) - remaining;
-  feedback(p.emoji+" "+p.name.toUpperCase()+"!", true);
-  render();
-  petAnim('petShake .5s ease');
+  const p=S.prizes[i], k=S.kids[active];
+  if(k.points<p.cost) return;
+  confirmBox("Spend "+p.cost+" ⭐?",`Trade ${p.cost} stars for ${p.emoji} ${p.name}?`,()=>{
+    undoSnap=snapshot(active); k.points-=p.cost;
+    S.redemptions=S.redemptions||[];
+    S.redemptions.unshift({id:Date.now()+Math.random(),kidIdx:active,kidName:k.name,emoji:p.emoji,name:p.name,cost:p.cost,ts:Date.now(),delivered:false});
+    if(S.redemptions.length>200) S.redemptions.length=200;
+    logAct("redeem",k.name,`${p.emoji} ${p.name} (−${p.cost}⭐)`);
+    celebrate(p.emoji+" "+p.name.toUpperCase()+"!"); haptic([15,40,15]); ding(true);
+    render(); petAnim('petShake .5s ease'); showUndo(`Redeemed ${p.name}`);
+  });
 }
-function bankIt(i){
-  const k = S.kids[i];
-  if(k.points<=0) return;
-  k.bank = (k.bank||0) + k.points;
-  k.points = 0;
-  save(); render();
-  feedback("BANKED! 🏦");
+function markDelivered(id){
+  const r=(S.redemptions||[]).find(x=>x.id===id); if(!r) return;
+  r.delivered=!r.delivered; save(); renderStats();
 }
-function resetDay(){
-  S.kids.forEach(k=>{k.done=[];k.counts={};k.points=0;});
-  render();
-  celebrate("NEW DAY!");
+function redeemFamily(){
+  const fg=S.familyGoal; if((S.familyProgress||0)<fg.target) return;
+  confirmBox("Claim family reward?",`Everyone worked together for ${fg.emoji} ${fg.name}!`,()=>{
+    S.familyProgress-=fg.target;
+    logAct("family","Squad",`${fg.emoji} ${fg.name} claimed!`);
+    goalCelebrate({name:"THE SQUAD"}); render();
+  });
 }
-
 /* ---------- celebration ---------- */
-function feedback(msg, big){
-  if(S.tweaks && S.tweaks.celebration==="quiet"){ quietToast(msg); return; }
-  celebrate(msg);
-  ding(big);
-}
-function quietToast(msg){
-  const t=document.getElementById("toast");
-  t.textContent = "✨ "+msg;
-  t.classList.add("show");
-  clearTimeout(quietToast._t);
-  quietToast._t = setTimeout(()=>t.classList.remove("show"),1100);
-}
 function celebrate(msg){
   const c=document.getElementById("cheer");
   document.getElementById("cheerMsg").textContent=msg;
-  c.classList.add("show");
-  fireConfetti();
+  c.classList.add("show"); fireConfetti(90);
   setTimeout(()=>c.classList.remove("show"),1100);
 }
-
+function goalCelebrate(k){
+  const c=document.getElementById("cheer");
+  document.getElementById("cheerMsg").textContent="🎉 "+(k.name||"YOU").toUpperCase()+" HIT THE GOAL! 🎉";
+  c.classList.add("show"); fireConfetti(160);
+  setTimeout(()=>fireConfetti(120),350); setTimeout(()=>fireConfetti(120),700);
+  ding("fanfare"); haptic([20,60,20,60,20]);
+  setTimeout(()=>c.classList.remove("show"),2000);
+}
 const cv=document.getElementById("confetti"), ctx=cv.getContext("2d");
 let bits=[];
 function sizeCv(){cv.width=innerWidth;cv.height=innerHeight}
 sizeCv(); addEventListener("resize",sizeCv);
-function fireConfetti(){
-  for(let i=0;i<90;i++){
-    bits.push({x:innerWidth/2,y:innerHeight/2,
-      vx:(Math.random()-.5)*15,vy:(Math.random()-.5)*15-4,
-      s:6+Math.random()*8,c:confettiColors[i%confettiColors.length],
-      rot:Math.random()*6,vr:(Math.random()-.5)*.4,life:72});
+const COLORS=["#ffb9a3","#f7a1b4","#9bd6b8","#a8cdea","#c9b6e6","#ffd98a"];
+function fireConfetti(n){
+  if(REDUCE) return; n=n||90;
+  for(let i=0;i<n;i++){
+    bits.push({x:innerWidth/2,y:innerHeight/2,vx:(Math.random()-.5)*15,vy:(Math.random()-.5)*15-4,
+      s:6+Math.random()*8,c:COLORS[i%COLORS.length],rot:Math.random()*6,vr:(Math.random()-.5)*.4,life:72});
   }
   if(!raf) loop();
 }
 let raf=null;
 function loop(){
   ctx.clearRect(0,0,cv.width,cv.height);
-  bits.forEach(b=>{
-    b.vy+=.38;b.x+=b.vx;b.y+=b.vy;b.rot+=b.vr;b.life--;
-    ctx.save();ctx.translate(b.x,b.y);ctx.rotate(b.rot);
-    ctx.fillStyle=b.c;
-    ctx.beginPath();ctx.roundRect(-b.s/2,-b.s/2,b.s,b.s*.62,2);ctx.fill();
-    ctx.restore();
+  bits.forEach(b=>{ b.vy+=.38;b.x+=b.vx;b.y+=b.vy;b.rot+=b.vr;b.life--;
+    ctx.save();ctx.translate(b.x,b.y);ctx.rotate(b.rot);ctx.fillStyle=b.c;
+    ctx.beginPath();ctx.roundRect(-b.s/2,-b.s/2,b.s,b.s*.62,2);ctx.fill();ctx.restore();
   });
   bits=bits.filter(b=>b.life>0 && b.y<cv.height+40);
-  if(bits.length){raf=requestAnimationFrame(loop)}
-  else{ctx.clearRect(0,0,cv.width,cv.height);raf=null}
+  if(bits.length){raf=requestAnimationFrame(loop)} else {ctx.clearRect(0,0,cv.width,cv.height);raf=null}
 }
-
-/* sound */
+/* ---------- sound ---------- */
 let ac;
-function ding(big){
+function toggleSound(){ S.settings.sound=!S.settings.sound; save(); render(); if(S.settings.sound) ding(); }
+function ding(mode){
+  if(!S.settings.sound) return;
   try{
     ac=ac||new (window.AudioContext||window.webkitAudioContext)();
-    const notes= big?[523,659,784,1047]:[659,880];
+    let notes; if(mode==="fanfare") notes=[523,659,784,1047,1319]; else if(mode===true) notes=[523,659,784,1047]; else notes=[659,880];
     notes.forEach((f,i)=>{
-      const o=ac.createOscillator(),g=ac.createGain();
-      o.type="sine";o.frequency.value=f;
-      o.connect(g);g.connect(ac.destination);
-      const t=ac.currentTime+i*0.09;
-      g.gain.setValueAtTime(0,t);
-      g.gain.linearRampToValueAtTime(.22,t+0.02);
-      g.gain.exponentialRampToValueAtTime(0.001,t+0.3);
-      o.start(t);o.stop(t+0.32);
+      const o=ac.createOscillator(),g=ac.createGain(); o.type="sine";o.frequency.value=f;
+      o.connect(g);g.connect(ac.destination); const t=ac.currentTime+i*0.09;
+      g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(.22,t+0.02);
+      g.gain.exponentialRampToValueAtTime(0.001,t+0.3); o.start(t);o.stop(t+0.32);
     });
   }catch(e){}
 }
-
-/* ---------- parent settings ---------- */
-function openParent(){
-  renderParent();
-  document.getElementById("modal").classList.add("show");
+/* ---------- reminders ---------- */
+let reminderTimers=[];
+function scheduleReminders(){
+  reminderTimers.forEach(t=>clearTimeout(t)); reminderTimers=[];
+  (S.settings.reminders||[]).forEach(r=>{
+    if(!r.time) return;
+    const [hh,mm]=r.time.split(":").map(Number);
+    const now=new Date(); const next=new Date(); next.setHours(hh,mm||0,0,0);
+    if(next<=now) next.setDate(next.getDate()+1);
+    const ms=next-now;
+    if(ms<2147483000){ reminderTimers.push(setTimeout(()=>{ fireReminder(r); scheduleReminders(); }, ms)); }
+  });
 }
+function fireReminder(r){
+  const msg=r.label||"Star Squad time!";
+  if(('Notification'in window)&&Notification.permission==="granted"){
+    if(navigator.serviceWorker&&navigator.serviceWorker.ready){
+      navigator.serviceWorker.ready.then(reg=>reg.showNotification("⭐ Star Squad",{body:msg,tag:"star-squad-reminder"})).catch(()=>{ try{ new Notification("⭐ Star Squad",{body:msg}); }catch(e){ toastMsgOnly("⏰ "+msg); } });
+    } else { try{ new Notification("⭐ Star Squad",{body:msg}); }catch(e){ toastMsgOnly("⏰ "+msg); } }
+  } else { toastMsgOnly("⏰ "+msg); }
+  ding(true);
+}
+function toastMsgOnly(msg){
+  const t=document.getElementById("toast");
+  document.getElementById("toastMsg").textContent=msg;
+  t.querySelector("button").style.display="none";
+  t.classList.add("show");
+  setTimeout(()=>{ t.classList.remove("show"); t.querySelector("button").style.display=""; },4000);
+}
+function requestReminderPermission(){
+  if(!('Notification'in window)){ alert("This device can't show notifications. Reminders will pop up in the app while it's open."); return; }
+  Notification.requestPermission().then(p=>{ alert(p==="granted"?"Reminders on! 🔔":"No problem — reminders will appear inside the app while it's open."); });
+}
+/* ---------- modal helpers (focus trap + esc) ---------- */
+function openM(id){ const m=document.getElementById(id); m._opener=document.activeElement; m.classList.add("show"); const f=m.querySelector('button,input,select,[tabindex]'); if(f&&f.focus)f.focus(); }
+function closeM(id){ const m=document.getElementById(id); m.classList.remove("show"); if(m._opener&&m._opener.focus)m._opener.focus(); }
+document.addEventListener("keydown",e=>{
+  const open=[...document.querySelectorAll('.modal.show, .coach.show')];
+  if(!open.length) return;
+  const m=open[open.length-1];
+  if(e.key==="Escape"){ m.classList.remove("show"); }
+  else if(e.key==="Tab"){
+    const f=m.querySelectorAll('button,input,select,[tabindex]:not([tabindex="-1"])');
+    if(!f.length) return; const first=f[0],last=f[f.length-1];
+    if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+  }
+});
+/* ---------- PIN ---------- */
+let pinAfter=null;
+function openParent(){
+  if(S.settings.pin && !parentUnlocked){ pinAfter=reallyOpenParent; document.getElementById("pinInput").value=""; document.getElementById("pinMsg").textContent="Grown-ups only"; openM("pinModal"); return; }
+  reallyOpenParent();
+}
+function reallyOpenParent(){ parentUnlocked=true; renderParent(); openM("modal"); }
+function submitPin(){
+  const v=document.getElementById("pinInput").value;
+  if(v===S.settings.pin){ closeM("pinModal"); const cb=pinAfter; pinAfter=null; if(cb)cb(); }
+  else { document.getElementById("pinMsg").textContent="Nope, try again"; document.getElementById("pinInput").value=""; }
+}
+function closePin(){ closeM("pinModal"); pinAfter=null; }
+/* ---------- bank ---------- */
+function openBank(){
+  if(S.settings.pin){ pinAfter=reallyOpenBank; document.getElementById("pinInput").value=""; document.getElementById("pinMsg").textContent="Grown-ups only — to move money"; openM("pinModal"); return; }
+  reallyOpenBank();
+}
+function reallyOpenBank(){ renderBank(); openM("bankModal"); }
+function renderBank(){
+  const rate=S.settings.starsPerDollar||15;
+  document.getElementById("bankBody").innerHTML=`
+    <div style="display:flex;gap:8px;align-items:center;margin:8px 0 14px;flex-wrap:wrap">
+      <span style="font-size:14px;color:var(--ink);font-weight:800">Rate:</span>
+      <input id="bankRate" type="number" min="1" step="1" value="${rate}" style="width:74px;text-align:center" onchange="setBankRate()">
+      <span style="font-size:14px;color:var(--ink-soft);font-weight:700">⭐ = $1</span>
+    </div>`
+    + S.kids.map((k,i)=>{
+      const worth=(k.points/rate);
+      const canOne=k.points>=rate, canFive=k.points>=rate*5;
+      return `<div class="kidedit">
+        <div class="kidhead"><b>${esc(k.avatar)} ${esc(k.name)}</b><span style="font-weight:800;color:var(--mint)">🏦 ${money(k.bank||0)}</span></div>
+        <div class="hint" style="margin:2px 0 8px">${k.points}⭐ &middot; worth ${money(worth)}</div>
+        <div class="bonusrow">
+          <button type="button" class="bb${canOne?' cash':''}" ${canOne?'':'disabled'} onclick="convertToMoney(${i},1)">Bank $1</button>
+          <button type="button" class="bb${canFive?' cash':''}" ${canFive?'':'disabled'} onclick="convertToMoney(${i},5)">Bank $5</button>
+          <button type="button" class="bb${canOne?' cash':''}" ${canOne?'':'disabled'} onclick="convertMax(${i})">Bank Max</button>
+          <button type="button" class="bb" ${(k.bank||0)>0?'':'disabled'} onclick="payOut(${i})">💵 Pay out</button>
+        </div>
+      </div>`;
+    }).join("");
+}
+function setBankRate(){ S.settings.starsPerDollar=Math.max(1,parseInt(gv("bankRate"))||15); save(); renderBank(); render(); }
+function convertToMoney(i,dollars){
+  const rate=S.settings.starsPerDollar||15; const need=dollars*rate; const k=S.kids[i];
+  if(k.points<need) return;
+  k.points-=need; k.bank=(k.bank||0)+dollars;
+  logAct("bank",k.name,`Banked ${money(dollars)} (−${need}⭐)`);
+  save(); renderBank(); render(); celebrate("💰 "+money(dollars)+" BANKED!"); ding(true); haptic([15,30,15]);
+}
+function convertMax(i){ const rate=S.settings.starsPerDollar||15; const d=Math.floor(S.kids[i].points/rate); if(d>0) convertToMoney(i,d); }
+function payOut(i){
+  const k=S.kids[i]; const amt=k.bank||0; if(amt<=0) return;
+  confirmBox("Pay out "+money(amt)+"?",`Hand ${esc(k.name)} their ${money(amt)} and reset their bank to $0.`,()=>{
+    logAct("payout",k.name,`Paid out ${money(amt)}`); k.bank=0; save(); renderBank(); render(); celebrate("💵 "+money(amt)+" PAID!");
+  });
+}
+function closeBank(){ closeM("bankModal"); }
+/* ---------- stats ---------- */
+function openStats(){ renderStats(); openM("statsModal"); }
+function closeStats(){ closeM("statsModal"); }
+function last14(){ const arr=[]; const d=new Date(); for(let i=13;i>=0;i--){const x=new Date(d);x.setDate(d.getDate()-i);arr.push(fmt(x));} return arr; }
+function heatColor(v,mx){ if(!v)return "var(--bg2)"; const t=Math.min(1,v/(mx||1)); const g=Math.round(214-t*70),r=Math.round(155+t*40); return `rgb(${r},${g},184)`; }
+function timeAgo(ts){ const s=(Date.now()-ts)/1000; if(s<60)return "now"; if(s<3600)return Math.floor(s/60)+"m"; if(s<86400)return Math.floor(s/3600)+"h"; return Math.floor(s/86400)+"d"; }
+function renderStats(){
+  const days=last14();
+  const kidHtml=S.kids.map((k,i)=>{
+    const hist=k.history||{};
+    const vals=days.map(d=> d===TODAY()?(hist[d]||0)+(k.todayEarned||0):(hist[d]||0));
+    const mx=Math.max(1,...vals); const best=bestStreak(k);
+    const heat=days.map((d,idx)=>`<div class="d" style="background:${heatColor(vals[idx],mx)}" title="${d}: ${vals[idx]}⭐">${vals[idx]?vals[idx]:""}</div>`).join("");
+    const shelf=BADGES.map(b=>{const got=(k.badges||[]).includes(b.key);return `<div class="bcell ${got?'':'locked'}"><div class="be">${b.emoji}</div><div class="bn">${b.name}</div></div>`;}).join("");
+    return `<div class="statkid">
+      <div class="sh">${esc(k.avatar)} ${esc(k.name)}</div>
+      <div class="statrow">
+        <div class="stat"><div class="n">🔥 ${streakOf(k)}</div><div class="l">Day streak</div></div>
+        <div class="stat"><div class="n">${best}</div><div class="l">Best streak</div></div>
+        <div class="stat"><div class="n">${k.lifetimePoints||0}</div><div class="l">Stars earned</div></div>
+        <div class="stat"><div class="n">${(k.badges||[]).length}/${BADGES.length}</div><div class="l">Badges</div></div>
+      </div>
+      <div class="heat">${heat}</div>
+      <div class="badgeshelf">${shelf}</div>
+    </div>`;
+  }).join("");
+  const acts=(S.activity||[]).slice(0,20).map(a=>`<div class="a"><span>${esc(a.kid)}: ${esc(a.text)}</span><small>${timeAgo(a.t)}</small></div>`).join("")||`<div class="hint">No activity yet.</div>`;
+  const redHtml=(S.redemptions||[]).slice(0,30).map(r=>`<div class="a"><span>${esc(r.kidName)}: ${esc(r.emoji)} ${esc(r.name)} (${r.cost}⭐)</span><button class="btn" style="padding:3px 10px;font-size:11px${r.delivered?';opacity:.5':''}" onclick="markDelivered(${JSON.stringify(r.id)})">${r.delivered?'✅ Delivered':'Mark delivered'}</button></div>`).join("")||`<div class="hint">No redemptions yet.</div>`;
+  document.getElementById("statsBody").innerHTML=kidHtml+`<div class="actlog"><b style="font-family:'Baloo 2';font-size:14px;color:var(--ink)">📜 Recent activity</b>${acts}</div>`+`<div class="actlog"><b style="font-family:'Baloo 2';font-size:14px;color:var(--ink)">🎁 Prize history</b>${redHtml}</div>`;
+}
+/* ---------- weekly report (print/PDF) ---------- */
+function openReport(){
+  const dateStr=new Date().toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  const rows=S.kids.map(k=>{
+    const badges=(k.badges||[]).map(bk=>{const b=BADGES.find(x=>x.key===bk);return b?b.emoji:"";}).join(" ")||"—";
+    return `<tr><td style="padding:8px;border-bottom:1px solid #ddd;text-align:left">${esc(k.avatar)} ${esc(k.name)}</td><td style="padding:8px;border-bottom:1px solid #ddd">${weekEarned(k)}</td><td style="padding:8px;border-bottom:1px solid #ddd">${streakOf(k)}</td><td style="padding:8px;border-bottom:1px solid #ddd">${bestStreak(k)}</td><td style="padding:8px;border-bottom:1px solid #ddd;text-align:left">${badges}</td></tr>`;
+  }).join("");
+  const redRows=(S.redemptions||[]).slice(0,25).map(r=>`<tr><td style="padding:6px;border-bottom:1px solid #eee;text-align:left">${esc(r.kidName)}</td><td style="padding:6px;border-bottom:1px solid #eee;text-align:left">${esc(r.emoji)} ${esc(r.name)}</td><td style="padding:6px;border-bottom:1px solid #eee">${r.cost}⭐</td><td style="padding:6px;border-bottom:1px solid #eee;text-align:left">${new Date(r.ts).toLocaleDateString()}</td><td style="padding:6px;border-bottom:1px solid #eee;text-align:left">${r.delivered?"✅ Delivered":"⏳ Pending"}</td></tr>`).join("")||`<tr><td colspan="5" style="padding:6px;color:#999">No redemptions yet.</td></tr>`;
+  document.getElementById("reportArea").innerHTML=`
+    <div style="font-family:'Baloo 2',sans-serif;max-width:720px;margin:0 auto;padding:30px;color:#3a2e2a">
+      <h1 style="font-size:26px;margin-bottom:2px">⭐ Star Squad — Weekly Report</h1>
+      <div style="color:#77655d;font-size:13px;margin-bottom:20px">${dateStr}</div>
+      <h2 style="font-size:16px;margin-bottom:8px">This Week</h2>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:24px">
+        <tr style="background:#f5ede6"><th style="padding:8px;text-align:left">Kid</th><th style="padding:8px">Stars this week</th><th style="padding:8px">Streak</th><th style="padding:8px">Best streak</th><th style="padding:8px;text-align:left">Badges</th></tr>
+        ${rows}
+      </table>
+      <h2 style="font-size:16px;margin-bottom:8px">Family Goal</h2>
+      <div style="font-size:13px;margin-bottom:24px">${esc(S.familyGoal.emoji)} ${esc(S.familyGoal.name)}: ${S.familyProgress||0} / ${S.familyGoal.target} ⭐</div>
+      <h2 style="font-size:16px;margin-bottom:8px">Prize Redemptions</h2>
+      <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+        <tr style="background:#f5ede6"><th style="padding:6px;text-align:left">Kid</th><th style="padding:6px;text-align:left">Prize</th><th style="padding:6px">Cost</th><th style="padding:6px;text-align:left">Date</th><th style="padding:6px;text-align:left">Status</th></tr>
+        ${redRows}
+      </table>
+    </div>`;
+  window.print();
+}
+/* ---------- parent settings ---------- */
 function renderParent(){
   const b=document.getElementById("parentBody");
-  b.innerHTML =
+  const s=S.settings;
+  b.innerHTML=
     `<div id="kidsEdit"></div>
      <button class="btn miniadd" onclick="addKid()">➕ Add a Kid</button>
      <hr style="border:none;border-top:2px solid var(--line);margin:20px 0 6px">
@@ -573,77 +1029,110 @@ function renderParent(){
      <hr style="border:none;border-top:2px solid var(--line);margin:20px 0 6px">
      <label style="font-size:15px;color:var(--ink);font-weight:800">🎁 Prizes</label>
      <div id="prizeEdit"></div>
-     <button class="btn miniadd" onclick="addPrize()">➕ Add a Prize</button>`;
-  renderKidsEdit();
-  renderTaskEdit();
-  renderPrizeEdit();
+     <button class="btn miniadd" onclick="addPrize()">➕ Add a Prize</button>
+     <hr style="border:none;border-top:2px solid var(--line);margin:20px 0 6px">
+     <label style="font-size:15px;color:var(--ink);font-weight:800">🤝 Team Missions</label>
+     <div class="hint">Everyone must join the same day to earn the bonus — great for sibling teamwork.</div>
+     <div id="coopEdit"></div>
+     <button class="btn miniadd" onclick="addCoop()">➕ Add a Team Mission</button>
+     <hr style="border:none;border-top:2px solid var(--line);margin:20px 0 6px">
+     <label style="font-size:15px;color:var(--ink);font-weight:800">🎁 Mystery Box &amp; Bonus Days</label>
+     <div class="hint">Each kid can open one Mystery Box a day for a surprise star reward. About 1 in 6 days is randomly a Double Star Day — shown as a banner up top.</div>
+     <hr style="border:none;border-top:2px solid var(--line);margin:20px 0 6px">
+     <label style="font-size:15px;color:var(--ink);font-weight:800">🎯 Family goal</label>
+     <div style="display:flex;gap:6px;align-items:center;margin-top:8px">
+       <input id="fgE" value="${esc(S.familyGoal.emoji)}" maxlength="4" style="width:52px;text-align:center;padding:9px 4px">
+       <input id="fgN" value="${esc(S.familyGoal.name)}" style="flex:1;padding:9px 11px" placeholder="Reward name">
+       <input id="fgT" type="number" value="${S.familyGoal.target}" style="width:70px;padding:9px 6px" title="Stars">
+     </div>
+     <hr style="border:none;border-top:2px solid var(--line);margin:20px 0 6px">
+     <label style="font-size:15px;color:var(--ink);font-weight:800">🎨 Theme</label>
+     <div class="seg" id="themeSeg">${THEMES.map(t=>`<button type="button" class="${s.theme===t.key?'sel':''}" onclick="setTheme('${t.key}')"><span class="swatch" style="background:${t.sw}"></span>${t.name}</button>`).join("")}</div>
+     <label style="font-size:15px;color:var(--ink);font-weight:800;margin-top:16px">🔔 Reminders</label>
+     <div id="remEdit"></div>
+     <button class="btn miniadd" onclick="addReminder()">➕ Add a Reminder</button>
+     <button class="btn" style="width:100%;margin-top:8px" onclick="requestReminderPermission()">Enable phone notifications</button>
+     <hr style="border:none;border-top:2px solid var(--line);margin:20px 0 6px">
+     <label style="font-size:15px;color:var(--ink);font-weight:800">☁️ Cloud Sync (beta)</label>
+     <div class="hint">Connect two devices with the same family code so both auto-update over the internet. Needs Wi-Fi/data on both; updates arrive every ~8 seconds.</div>
+     ${s.syncCode?`
+       <div class="hint" id="syncStatus" style="font-weight:700">☁️ Connected</div>
+       <div style="display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap">
+         <input value="${esc(s.syncCode)}" readonly style="flex:1;min-width:120px;font-weight:800;letter-spacing:1px">
+         <button type="button" class="btn" onclick="copySyncCode()">📋 Copy code</button>
+         <button type="button" class="btn" style="border-color:var(--rose);color:#b25a6e" onclick="disconnectSync()">✖ Disconnect</button>
+       </div>`:`
+       <div style="display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap">
+         <input id="syncCodeInput" placeholder="Enter family code to join" style="flex:1;min-width:140px">
+         <button type="button" class="btn" onclick="joinSyncCode()">🔄 Join</button>
+       </div>
+       <button type="button" class="btn" style="width:100%;margin-top:8px" onclick="createSyncCode()">☁️ Create New Family Code</button>
+       <div class="hint" id="syncStatus"></div>`}
+     <hr style="border:none;border-top:2px solid var(--line);margin:20px 0 6px">
+     <label style="font-size:15px;color:var(--ink);font-weight:800">🏦 Star Bank</label>
+     <div style="display:flex;gap:8px;align-items:center;margin-top:6px"><input id="rateSet" type="number" min="1" step="1" value="${s.starsPerDollar||15}" style="width:74px;text-align:center"><span style="font-size:13px;color:var(--ink-soft);font-weight:700">⭐ = $1</span></div>
+     <div class="hint">Open 🏦 Bank on the main screen to convert stars &amp; pay out.</div>
+     <label style="font-size:15px;color:var(--ink);font-weight:800;margin-top:16px">🔒 Parent PIN</label>
+     <div class="hint">Leave blank for no lock. 4 digits.</div>
+     <input id="pinSet" type="text" inputmode="numeric" maxlength="4" value="${esc(s.pin||'')}" placeholder="e.g. 1234">
+     <label style="font-size:15px;color:var(--ink);font-weight:800;margin-top:16px">📳 Extras</label>
+     <div class="seg" style="margin-top:6px">
+       <button type="button" id="hapBtn" class="${s.haptics?'sel':''}" onclick="toggleHaptics()">📳 Vibrate: ${s.haptics?'On':'Off'}</button>
+       <button type="button" id="apprBtn" class="${s.requireApproval?'sel':''}" onclick="toggleApproval()">🧐 Approval needed: ${s.requireApproval?'On':'Off'}</button>
+       <button type="button" onclick="startCoach(true)">👋 Replay tutorial</button>
+       <button type="button" onclick="newDayNow()">🔄 New Day now</button>
+     </div>`;
+  renderKidsEdit(); renderTaskEdit(); renderPrizeEdit(); renderRemEdit(); renderCoopEdit();
 }
+function setTheme(k){ readAllEdits(); S.settings.theme=k; applyTheme(); renderParent(); }
+function toggleHaptics(){ readAllEdits(); S.settings.haptics=!S.settings.haptics; renderParent(); haptic(20); }
+function newDayNow(){
+  readAllEdits();
+  confirmBox("Start a new day now?","Banks today's stars into each kid's streak and clears the day's checkmarks.",()=>{
+    const today=TODAY(); S.kids.forEach(k=>{ if((k.todayEarned||0)>0){k.history[today]=(k.history[today]||0)+k.todayEarned;} k.todayEarned=0;k.counts={};k.done=[]; k.happiness=Math.max(20,(k.happiness||60)-10); checkBadges(S.kids.indexOf(k)); });
+    logAct("newday","Squad","New day started"); save(); renderParent(); celebrate("NEW DAY!");
+  });
+}
+function avatarPicker(i,cur){ return `<div class="emojipick" id="ap${i}">`+AVATAR_CHOICES.map(e=>`<button type="button" class="${e===cur?'sel':''}" onclick="pickAvatar(${i},'${e}')">${e}</button>`).join("")+`</div>`; }
+function pickAvatar(i,e){ readAllEdits(); S.kids[i].avatar=e; renderKidsEdit(); }
 function renderKidsEdit(){
-  document.getElementById("kidsEdit").innerHTML = S.kids.map((k,i)=>`
+  document.getElementById("kidsEdit").innerHTML=S.kids.map((k,i)=>`
     <div class="kidedit">
-      <div class="kidhead">
-        <b>Kid ${i+1}</b>
-        ${S.kids.length>1?`<button class="btn" style="padding:6px 10px;border-color:var(--rose);color:#b25a6e" onclick="removeKid(${i})">🗑️ Remove</button>`:``}
-      </div>
-      <label>Name</label>
-      <input id="kn${i}" value="${esc(k.name)}">
+      <div class="kidhead"><b>Kid ${i+1}</b>${S.kids.length>1?`<button class="btn" style="padding:6px 10px;border-color:var(--rose);color:#b25a6e" onclick="removeKid(${i})">🗑️ Remove</button>`:``}</div>
+      <label>Name</label><input id="kn${i}" value="${esc(k.name)}">
+      <label>Pick an emoji</label>${avatarPicker(i,k.avatar)}
       <div style="display:flex;gap:10px">
-        <div style="width:90px"><label>Emoji</label><input id="ke${i}" value="${esc(k.avatar)}" maxlength="4" style="text-align:center"></div>
-        <div style="flex:1"><label>Star goal</label><input id="kg${i}" type="number" value="${k.goal}"></div>
+        <div style="width:110px"><label>Or type one</label><input id="ke${i}" value="${esc(k.avatar)}" maxlength="4" style="text-align:center"></div>
+        <div style="flex:1"><label>Daily goal</label><input id="kg${i}" type="number" value="${k.goal}"></div>
+        <div style="flex:1"><label>Weekly goal</label><input id="kw${i}" type="number" value="${k.weeklyGoal}"></div>
+      </div>
+      <div class="bonusrow">
+        <span class="bl">🎁 Surprise stars (now: ${k.points}⭐)</span>
+        <button type="button" class="bb" onclick="bonus(${i},1)">+1</button>
+        <button type="button" class="bb" onclick="bonus(${i},5)">+5</button>
+        <button type="button" class="bb" onclick="bonus(${i},10)">+10</button>
       </div>
     </div>`).join("");
 }
-function readKidsEdit(){
-  S.kids = S.kids.map((k,i)=>({
-    ...k,
-    name:(document.getElementById("kn"+i)?.value ?? k.name).trim()||k.name,
-    avatar:(document.getElementById("ke"+i)?.value ?? k.avatar).trim()||"⭐",
-    goal:Math.max(5,parseInt(document.getElementById("kg"+i)?.value)||k.goal)
-  }));
-}
-function addKid(){
-  readKidsEdit(); readTaskEdit(); readPrizeEdit();
-  const emojis=["🦁","🐯","🐻","🦊","🐨","🐸","🐵","🦄","🐙","🐢"];
-  S.kids.push({name:"Kid "+(S.kids.length+1), avatar:emojis[S.kids.length % emojis.length], points:0, today:0, bank:0, goal:50, done:[], counts:{}, pet:PETS[S.kids.length % PETS.length].key});
-  renderKidsEdit();
-}
-function removeKid(i){
-  if(S.kids.length<=1) return;
-  readKidsEdit(); readTaskEdit(); readPrizeEdit();
-  S.kids.splice(i,1);
-  clampActive();
-  renderKidsEdit();
-}
+function bonus(i,n){ readAllEdits(); const k=S.kids[i]; k.points+=n;k.todayEarned=(k.todayEarned||0)+n;k.lifetimePoints=(k.lifetimePoints||0)+n;k.happiness=Math.min(100,(k.happiness||60)+4);S.familyProgress=(S.familyProgress||0)+n; logAct("bonus",k.name,`+${n}⭐ surprise`); checkBadges(i); save(); renderKidsEdit(); }
+function readKidsEdit(){ S.kids=S.kids.map((k,i)=>({...k,name:(gv("kn"+i)??k.name).trim()||k.name,avatar:(gv("ke"+i)??k.avatar).trim()||"⭐",goal:Math.max(5,parseInt(gv("kg"+i))||k.goal),weeklyGoal:Math.max(5,parseInt(gv("kw"+i))||k.weeklyGoal)})); }
+function gv(id){ const el=document.getElementById(id); return el?el.value:undefined; }
+function addKid(){ readAllEdits(); S.kids.push(migrateKid({name:"Kid "+(S.kids.length+1),avatar:AVATAR_CHOICES[S.kids.length%AVATAR_CHOICES.length],points:0,goal:50,weeklyGoal:100,done:[],counts:{},pet:PETS[S.kids.length%PETS.length].key})); renderKidsEdit(); }
+function removeKid(i){ if(S.kids.length<=1) return; readAllEdits(); S.kids.splice(i,1); clampActive(); renderKidsEdit(); }
 function renderTaskEdit(){
-  document.getElementById("taskEdit").innerHTML = S.tasks.map((t,i)=>`
+  document.getElementById("taskEdit").innerHTML=S.tasks.map((t,i)=>`
     <div style="display:flex;gap:6px;align-items:center;margin-top:8px">
       <input id="te${i}" value="${esc(t.emoji)}" maxlength="4" style="width:50px;text-align:center;padding:9px 4px" placeholder="✅">
       <input id="tl${i}" value="${esc(t.label)}" style="flex:1;padding:9px 11px" placeholder="Task name">
-      <input id="tv${i}" type="number" value="${t.val}" style="width:62px;padding:9px 6px" placeholder="+pts" title="Points">
+      <input id="tv${i}" type="number" value="${t.val}" style="width:62px;padding:9px 6px" title="Points">
       <button class="btn" style="padding:9px 11px;border-color:var(--rose);color:#b25a6e" onclick="removeTask(${i})">🗑️</button>
     </div>`).join("");
 }
-function readTaskEdit(){
-  S.tasks = S.tasks.map((t,i)=>({
-    ...t,
-    emoji:(document.getElementById("te"+i)?.value||t.emoji).trim()||"✅",
-    label:(document.getElementById("tl"+i)?.value||t.label).trim()||"Task",
-    val:Math.max(1,parseInt(document.getElementById("tv"+i)?.value)||t.val)
-  }));
-}
-function addTask(){
-  readKidsEdit(); readTaskEdit(); readPrizeEdit();
-  S.tasks.push({emoji:"⭐", label:"New Task", val:5, color:"c-mint"});
-  renderTaskEdit();
-}
-function removeTask(i){
-  readKidsEdit(); readTaskEdit(); readPrizeEdit();
-  S.tasks.splice(i,1);
-  S.kids.forEach(k=>{ if(k.done) k.done=k.done.filter(d=>d!==i).map(d=>d>i?d-1:d); });
-  renderTaskEdit();
-}
+function readTaskEdit(){ S.tasks=S.tasks.map((t,i)=>({...t,emoji:(gv("te"+i)||t.emoji).trim()||"✅",label:(gv("tl"+i)||t.label).trim()||"Task",val:Math.max(1,parseInt(gv("tv"+i))||t.val)})); }
+function addTask(){ readAllEdits(); S.tasks.push({emoji:"⭐",label:"New Task",val:5,color:"c-mint"}); renderTaskEdit(); }
+function removeTask(i){ readAllEdits(); S.tasks.splice(i,1); S.kids.forEach(k=>{if(k.counts){const nc={};Object.keys(k.counts).forEach(key=>{const n=+key; if(n<i)nc[n]=k.counts[key]; else if(n>i)nc[n-1]=k.counts[key];}); k.counts=nc;}}); renderTaskEdit(); }
 function renderPrizeEdit(){
-  document.getElementById("prizeEdit").innerHTML = S.prizes.map((p,i)=>`
+  document.getElementById("prizeEdit").innerHTML=S.prizes.map((p,i)=>`
     <div style="display:flex;gap:6px;align-items:center;margin-top:8px">
       <input id="pe${i}" value="${esc(p.emoji)}" maxlength="4" style="width:52px;text-align:center;padding:9px 4px" placeholder="🎁">
       <input id="pn${i}" value="${esc(p.name)}" style="flex:1;padding:9px 11px" placeholder="Prize name">
@@ -651,99 +1140,173 @@ function renderPrizeEdit(){
       <button class="btn" style="padding:9px 11px;border-color:var(--rose);color:#b25a6e" onclick="removePrize(${i})">🗑️</button>
     </div>`).join("");
 }
-function readPrizeEdit(){
-  S.prizes = S.prizes.map((p,i)=>({
-    emoji:(document.getElementById("pe"+i)?.value||p.emoji).trim()||"🎁",
-    name:(document.getElementById("pn"+i)?.value||p.name).trim()||"Prize",
-    cost:Math.max(1,parseInt(document.getElementById("pc"+i)?.value)||p.cost)
-  }));
+function readPrizeEdit(){ S.prizes=S.prizes.map((p,i)=>({emoji:(gv("pe"+i)||p.emoji).trim()||"🎁",name:(gv("pn"+i)||p.name).trim()||"Prize",cost:Math.max(1,parseInt(gv("pc"+i))||p.cost)})); }
+function addPrize(){ readAllEdits(); S.prizes.push({emoji:"🎁",name:"New Prize",cost:25}); renderPrizeEdit(); }
+function removePrize(i){ readAllEdits(); S.prizes.splice(i,1); renderPrizeEdit(); }
+function renderCoopEdit(){
+  document.getElementById("coopEdit").innerHTML=(S.coopTasks||[]).map((t,i)=>`
+    <div style="display:flex;gap:6px;align-items:center;margin-top:8px">
+      <input id="ce${i}" value="${esc(t.emoji)}" maxlength="4" style="width:50px;text-align:center;padding:9px 4px" placeholder="🤝">
+      <input id="cl${i}" value="${esc(t.label)}" style="flex:1;padding:9px 11px" placeholder="Mission name">
+      <input id="cb${i}" type="number" value="${t.bonus}" style="width:62px;padding:9px 6px" title="Bonus per kid">
+      <button class="btn" style="padding:9px 11px;border-color:var(--rose);color:#b25a6e" onclick="removeCoop(${i})">🗑️</button>
+    </div>`).join("")||`<div class="hint">No team missions yet.</div>`;
 }
-function addPrize(){
-  readKidsEdit(); readTaskEdit(); readPrizeEdit();
-  S.prizes.push({emoji:"🎁", name:"New Prize", cost:25});
-  renderPrizeEdit();
+function readCoopEdit(){ S.coopTasks=(S.coopTasks||[]).map((t,i)=>({emoji:(gv("ce"+i)||t.emoji).trim()||"🤝",label:(gv("cl"+i)||t.label).trim()||"Team Mission",bonus:Math.max(1,parseInt(gv("cb"+i))||t.bonus)})); }
+function addCoop(){ readAllEdits(); S.coopTasks=S.coopTasks||[]; S.coopTasks.push({emoji:"🤝",label:"New Mission",bonus:10}); renderCoopEdit(); }
+function removeCoop(i){ readAllEdits(); S.coopTasks.splice(i,1); renderCoopEdit(); }
+function renderRemEdit(){
+  document.getElementById("remEdit").innerHTML=(S.settings.reminders||[]).map((r,i)=>`
+    <div style="display:flex;gap:6px;align-items:center;margin-top:8px">
+      <input id="rt${i}" type="time" value="${esc(r.time||'')}" style="width:120px;padding:9px 6px">
+      <input id="rl${i}" value="${esc(r.label||'')}" style="flex:1;padding:9px 11px" placeholder="e.g. Brush teeth!">
+      <button class="btn" style="padding:9px 11px;border-color:var(--rose);color:#b25a6e" onclick="removeReminder(${i})">🗑️</button>
+    </div>`).join("")||`<div class="hint">No reminders yet.</div>`;
 }
-function removePrize(i){
-  readKidsEdit(); readTaskEdit(); readPrizeEdit();
-  S.prizes.splice(i,1);
-  renderPrizeEdit();
+function readRemEdit(){ S.settings.reminders=(S.settings.reminders||[]).map((r,i)=>({time:gv("rt"+i)||r.time,label:(gv("rl"+i)||r.label||"").trim()})); }
+function addReminder(){ readAllEdits(); S.settings.reminders=S.settings.reminders||[]; S.settings.reminders.push({time:"19:00",label:"Star Squad time!"}); renderRemEdit(); }
+function removeReminder(i){ readAllEdits(); S.settings.reminders.splice(i,1); renderRemEdit(); }
+function readMisc(){
+  S.familyGoal={emoji:(gv("fgE")||S.familyGoal.emoji).trim()||"🎯",name:(gv("fgN")||S.familyGoal.name).trim()||"Family reward",target:Math.max(10,parseInt(gv("fgT"))||S.familyGoal.target)};
+  S.settings.starsPerDollar=Math.max(1,parseInt(gv("rateSet"))||15);
+  S.settings.pin=(gv("pinSet")||"").replace(/\D/g,"").slice(0,4);
 }
-function closeParent(){document.getElementById("modal").classList.remove("show")}
-function saveParent(){
-  readKidsEdit();
-  readTaskEdit();
-  readPrizeEdit();
-  closeParent();render();
-}
-
+function readAllEdits(){ if(document.getElementById("kn0")||document.getElementById("kidsEdit")){readKidsEdit();readTaskEdit();readPrizeEdit();readRemEdit();readCoopEdit();readMisc();} }
+function closeParent(){ parentUnlocked=false; closeM("modal"); }
+function saveParent(){ readAllEdits(); closeParent(); applyTheme(); scheduleReminders(); render(); }
 /* ---------- pet picker ---------- */
 let petKidIdx=0;
-function openPet(i){ petKidIdx=i; active=i; renderPetGrid(); document.getElementById("petModal").classList.add("show"); render(); }
+function openPet(i){ petKidIdx=i; active=i; S.kids[i].happiness=Math.min(100,(S.kids[i].happiness||60)+4); document.getElementById("petNameInput").value=S.kids[i].petName||""; renderPetGrid(); openM("petModal"); render(); ding(); haptic(12); }
+function renamePet(v){ S.kids[petKidIdx].petName=v.slice(0,16); render(); }
 function renderPetGrid(){
-  const cur = S.kids[petKidIdx].pet || PETS[petKidIdx%PETS.length].key;
-  document.getElementById("petGrid").innerHTML = PETS.map(p=>`
-    <button class="petopt ${p.key===cur?'sel':''}" onclick="choosePet('${p.key}')">
-      <span class="pe">${p.stages[p.stages.length-1]}</span>
-      <span class="pl">${p.name}</span>
-    </button>`).join("");
+  const cur=S.kids[petKidIdx].pet||PETS[petKidIdx%PETS.length].key;
+  document.getElementById("petGrid").innerHTML=PETS.map(p=>`<button class="petopt ${p.key===cur?'sel':''}" onclick="choosePet('${p.key}')"><span class="pe">${p.stages[p.stages.length-1]}</span><span class="pl">${p.name}</span></button>`).join("");
 }
 function choosePet(key){ S.kids[petKidIdx].pet=key; renderPetGrid(); render(); ding(); }
-function closePet(){ document.getElementById("petModal").classList.remove("show"); }
-
+function closePet(){ closeM("petModal"); }
+/* ---------- tutorial ---------- */
+let coachStep=0;
+function startCoach(force){
+  if(!force){ try{ if(localStorage.getItem("starSquadTutorial")) return; }catch(e){} }
+  coachStep=0; showCoach(); document.getElementById("coach").classList.add("show");
+}
+function showCoach(){
+  const c=COACH[coachStep];
+  document.getElementById("coachEmoji").textContent=c.e;
+  document.getElementById("coachTitle").textContent=c.t;
+  document.getElementById("coachText").textContent=c.p;
+  document.getElementById("coachDots").innerHTML=COACH.map((_,i)=>`<i class="${i===coachStep?'on':''}"></i>`).join("");
+  document.getElementById("coachNext").textContent=coachStep<COACH.length-1?"Next":"Let's go!";
+}
+function nextCoach(){ if(coachStep<COACH.length-1){ coachStep++; showCoach(); } else skipCoach(); }
+function skipCoach(){ document.getElementById("coach").classList.remove("show"); try{localStorage.setItem("starSquadTutorial","1");}catch(e){} }
+/* ---------- cloud sync (beta, best-effort via kvdb.io) ---------- */
+let lastPushedJSON="", pushTimer=null, syncPollTimer=null;
+function setSyncStatus(txt){ const el=document.getElementById("syncStatus"); if(el) el.textContent=txt; }
+function schedulePush(){ if(!S.settings.syncCode) return; clearTimeout(pushTimer); pushTimer=setTimeout(()=>pushRemote(false),1500); }
+async function pushRemote(force){
+  if(!S.settings.syncCode) return;
+  const json=JSON.stringify(S);
+  if(!force && json===lastPushedJSON) return;
+  setSyncStatus("Syncing…");
+  try{
+    await fetch("https://jsonblob.com/api/jsonBlob/"+S.settings.syncCode,{method:"PUT",headers:{"Content-Type":"application/json"},body:json});
+    lastPushedJSON=json; setSyncStatus("☁️ Synced just now");
+  }catch(e){ setSyncStatus("⚠️ Offline — will retry"); }
+}
+async function pullRemote(initial){
+  if(!S.settings.syncCode) return;
+  setSyncStatus("Checking for updates…");
+  try{
+    const r=await fetch("https://jsonblob.com/api/jsonBlob/"+S.settings.syncCode);
+    if(r.status===404){ setSyncStatus("⚠️ Code not found"); return; }
+    const text=await r.text();
+    if(!text){ setSyncStatus("No cloud data yet"); return; }
+    const d=JSON.parse(text);
+    if(d&&d.kids&&(initial||(d.updatedAt||0)>(S.updatedAt||0))){
+      S=migrate(d); active=0; clampActive(); lastPushedJSON=text; save(); applyTheme(); render();
+      setSyncStatus("☁️ Synced just now");
+    } else setSyncStatus("☁️ Up to date");
+  }catch(e){ setSyncStatus("⚠️ Offline — will retry"); }
+}
+function startSyncPolling(){
+  clearInterval(syncPollTimer);
+  if(!S.settings.syncCode) return;
+  syncPollTimer=setInterval(()=>pullRemote(false),8000);
+}
+async function createSyncCode(){
+  readAllEdits();
+  setSyncStatus("Creating code…");
+  try{
+    const r=await fetch("https://jsonblob.com/api/jsonBlob",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(S)});
+    const loc=r.headers.get("Location")||"";
+    const id=loc.split("/").filter(Boolean).pop();
+    if(!id) throw new Error("no id");
+    S.settings.syncCode=id; lastPushedJSON=JSON.stringify(S); save(); startSyncPolling(); renderParent();
+  }catch(e){ alert("Couldn't reach the cloud. Check your internet connection and try again."); }
+}
+function joinSyncCode(){
+  readAllEdits();
+  const code=(gv("syncCodeInput")||"").trim();
+  if(!code) return;
+  S.settings.syncCode=code; save(); pullRemote(true); startSyncPolling(); renderParent();
+}
+function disconnectSync(){ readAllEdits(); S.settings.syncCode=""; clearInterval(syncPollTimer); save(); renderParent(); }
+function copySyncCode(){
+  const code=S.settings.syncCode; if(!code) return;
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(()=>toastMsgOnly("Code copied: "+code)).catch(()=>window.prompt("Family code:",code));
+  else window.prompt("Family code:",code);
+}
+/* ---------- share link (device-to-device sync) ---------- */
+function shareLink(){
+  try{
+    const data=btoa(encodeURIComponent(JSON.stringify(S)));
+    const url=location.origin+location.pathname+"#sync="+data;
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(()=>celebrate("LINK COPIED! 🔗")).catch(()=>promptShareUrl(url));
+    } else promptShareUrl(url);
+    if(navigator.share){ navigator.share({title:"Star Squad",text:"Open this to sync our Star Squad data",url}).catch(()=>{}); }
+  }catch(e){ alert("Couldn't create a share link on this device."); }
+}
+function promptShareUrl(url){ window.prompt("Copy this link and open it on the other device:",url); }
+function checkSyncLink(){
+  const m=location.hash.match(/sync=([^&]+)/);
+  if(!m) return;
+  history.replaceState(null,"",location.pathname+location.search);
+  try{
+    const d=JSON.parse(decodeURIComponent(atob(m[1])));
+    if(!(d&&d.kids&&d.tasks&&d.prizes)){ alert("That sync link looks broken."); return; }
+    confirmBox("Sync data from link?","This replaces everything on this device with the data from the link.",()=>{
+      S=migrate(d); active=0; save(); applyTheme(); scheduleReminders(); render(); celebrate("SYNCED! 🔗");
+    });
+  }catch(e){ alert("That sync link looks broken."); }
+}
 /* ---------- backup / restore ---------- */
 function backupData(){
   const blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url; a.download="star-squad-backup.json";
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),1000);
-  celebrate("SAVED! 💾");
+  const url=URL.createObjectURL(blob); const a=document.createElement("a");
+  a.href=url; a.download="star-squad-backup.json"; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000); celebrate("SAVED! 💾");
 }
 function restoreData(e){
-  const f=e.target.files[0]; if(!f) return;
-  const r=new FileReader();
-  r.onload=()=>{
-    try{
-      const d=JSON.parse(r.result);
-      if(d&&d.kids&&d.tasks&&d.prizes){
-        S=d; active=0;
-        if(!S.tweaks) S.tweaks={theme:"peach", vibe:"playful", celebration:"big"};
-        applyTheme(S.tweaks.theme); applyVibe(S.tweaks.vibe);
-        save(); render(); celebrate("RESTORED! 📂");
-      }
+  const f=e.target.files[0]; if(!f) return; const r=new FileReader();
+  r.onload=()=>{ try{ const d=JSON.parse(r.result);
+      if(d&&d.kids&&d.tasks&&d.prizes){ S=migrate(d); active=0; save(); applyTheme(); scheduleReminders(); render(); celebrate("RESTORED! 📂"); }
       else alert("That file doesn't look like a Star Squad backup.");
-    }catch(err){ alert("Couldn't read that backup file."); }
-  };
-  r.readAsText(f);
-  e.target.value="";
+    }catch(err){ alert("Couldn't read that backup file."); } };
+  r.readAsText(f); e.target.value="";
 }
-
-/* ---------- tweaks panel ---------- */
-function openTweaks(){ renderTweaks(); document.getElementById("tweaksModal").classList.add("show"); }
-function closeTweaks(){ document.getElementById("tweaksModal").classList.remove("show"); }
-function renderTweaks(){
-  document.getElementById("themeRow").innerHTML = Object.entries(THEMES).map(([key,t])=>`
-    <button type="button" class="swatch ${S.tweaks.theme===key?'sel':''}" onclick="setTheme('${key}')">
-      <span class="dots">${t.dots.map(c=>`<span class="dot" style="background:${c}"></span>`).join('')}</span>
-      <span class="sl">${t.label}</span>
-    </button>`).join("");
-  document.getElementById("vibeRow").innerHTML = [["playful","🎈 Playful"],["chill","🌙 Chill"]].map(([k,l])=>
-    `<button type="button" class="${S.tweaks.vibe===k?'sel':''}" onclick="setVibe('${k}')">${l}</button>`).join("");
-  document.getElementById("celebRow").innerHTML = [["big","🎉 Big"],["quiet","🤫 Quiet"]].map(([k,l])=>
-    `<button type="button" class="${S.tweaks.celebration===k?'sel':''}" onclick="setCelebration('${k}')">${l}</button>`).join("");
-}
-function setTheme(key){ S.tweaks.theme=key; applyTheme(key); save(); render(); renderTweaks(); }
-function setVibe(v){ S.tweaks.vibe=v; applyVibe(v); save(); renderTweaks(); }
-function setCelebration(c){ S.tweaks.celebration=c; save(); renderTweaks(); }
-
-/* clouds bg */
+/* ---------- boot ---------- */
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js').catch(()=>{}); }
 (function(){const d=document.getElementById("clouds");const e=["☁️","⭐","🌸","☁️","✨"];let h="";for(let i=0;i<7;i++){h+=`<i style="left:${Math.random()*90}%;top:${5+Math.random()*80}%;animation-delay:${-Math.random()*26}s;animation-duration:${20+Math.random()*16}s">${e[i%e.length]}</i>`}d.innerHTML=h})();
-
-applyTheme(S.tweaks.theme);
-applyVibe(S.tweaks.vibe);
-document.getElementById("revtag").textContent = `rev ${REV} · ${REV_DATE}`;
+applyTheme();
+autoRollover();
 render();
+scheduleReminders();
+checkSyncLink();
+if(S.settings.syncCode){ pullRemote(true); startSyncPolling(); }
+setInterval(()=>{ if(autoRollover()) render(); }, 60000);
+startCoach(false);
 </script>
 </body>
 </html>

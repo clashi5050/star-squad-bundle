@@ -1,6 +1,3 @@
-Updates:
-Added banking feature
-
 # Star Squad ⭐
 
 A single-page reward chart for kids. Tap a chore to earn stars, watch the
@@ -20,9 +17,11 @@ between devices.
 - **Growing pet** — each kid picks a pet (puppy, kitten, butterfly, chick,
   avocado, or tree) that visibly grows through its stages as they earn
   points toward their goal.
-- **Bank** — kids can tap the bank icon on their card to stash their current
-  points; banked points still count toward prizes but are kept separate
-  from the in-progress total shown on the goal bar.
+- **Star Bank** — a PIN-gated 🏦 Bank screen (footer button) where a grown-up
+  converts a kid's stars into real banked dollars at an adjustable rate
+  (default 15⭐ = $1, set in Grown-Up Settings), via Bank $1 / Bank $5 / Bank
+  Max buttons; a Pay Out button hands over the banked cash and resets that
+  kid's bank to $0. Each kid's card shows their banked total.
 - **Prize shop** — a horizontal row of redeemable prizes that light up once a
   kid has enough points (spending from points first, then the bank);
   redeeming deducts the cost and triggers a celebration.
@@ -47,6 +46,19 @@ build step and nothing to install. A small revision tag (e.g. `rev 5 ·
 `REV_DATE` constants) with each shipped update.
 
 ## Changelog
+
+**Rev 6 — 2026-07-22**
+- Reworked the bank from a simple "stash your points" feature into a real
+  star-to-money bank: added a dedicated 🏦 Bank screen (PIN-gated, like
+  Grown-Up Settings) with Bank $1 / Bank $5 / Bank Max buttons per kid and a
+  Pay Out button that hands over the cash and zeroes that kid's bank.
+- Replaced the old flat `allowancePerStar` setting (and the matching
+  "Cash out $x" button in Grown-Up Settings) with an adjustable
+  `starsPerDollar` conversion rate (default 15⭐ = $1), settable from both the
+  new Bank screen and Grown-Up Settings.
+- Each kid's `bank` value now tracks banked **dollars**, not stars — banking
+  spends stars off their point total instead of just tagging them as saved.
+- Banking and pay-out actions are logged to the activity feed.
 
 **Rev 5 — 2026-07-09**
 - Added a growable pet for each kid to choose from.

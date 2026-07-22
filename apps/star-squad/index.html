@@ -199,6 +199,11 @@
     *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
     .clouds{display:none}
   }
+  #reportArea{display:none}
+  @media print{
+    .wrap,.lock,.cheer,#confetti,.toast,.modal,.coach{display:none !important}
+    #reportArea{display:block !important}
+  }
 </style>
 </head>
 <body>
@@ -207,11 +212,17 @@
   <header>
     <div class="title"><span class="s">⭐</span> Star Squad <span class="s">⭐</span></div>
     <div class="subtitle">Tap what you did. Earn stars. Win prizes!</div>
+    <div id="bonusBanner" style="display:none;margin-top:8px;font-family:'Baloo 2',inherit;font-weight:800;font-size:14px;color:#c77b12;background:#fff3d6;border:2px solid var(--butter);border-radius:99px;padding:6px 16px"></div>
   </header>
   <div class="board" id="board" role="list"></div>
   <div class="familybar" id="familybar"></div>
   <div class="whoseturn" id="turn" aria-live="polite"></div>
+  <button class="btn" id="mysteryBtn" onclick="openMystery()" style="display:block;margin:0 auto 16px;font-size:15px;padding:12px 22px;background:var(--butter);border:none;color:#7a5a20;font-weight:800;box-shadow:0 6px 16px var(--shadow)">🎁 Open Today's Mystery Box</button>
   <div class="grid" id="grid" role="list"></div>
+  <div class="prizebar" style="margin-top:16px">
+    <h2>🤝 Team Missions</h2>
+    <div class="prizes" id="teamMissions"></div>
+  </div>
   <div class="prizebar">
     <h2>🎁 Prize Shop</h2>
     <div class="prizes" id="prizes"></div>
@@ -219,8 +230,11 @@
   <div class="footer">
     <button class="btn" onclick="openStats()">📊 Stats</button>
     <button class="btn" onclick="openBank()">🏦 Bank</button>
+    <button class="btn" onclick="openApprovals()">✅ Approvals<span id="approvalsBadge" style="display:none;margin-left:6px;background:var(--rose);color:#fff;border-radius:99px;padding:1px 7px;font-size:11px"></span></button>
+    <button class="btn" onclick="openReport()">📄 Weekly Report</button>
     <button class="btn" id="soundBtn" onclick="toggleSound()">🔊 Sound</button>
     <button class="btn" onclick="openParent()">🔒 Grown-Up Settings</button>
+    <button class="btn" onclick="shareLink()">🔗 Share to Device</button>
     <button class="btn" onclick="backupData()">💾 Backup</button>
     <button class="btn" onclick="document.getElementById('restoreFile').click()">📂 Restore</button>
     <input type="file" id="restoreFile" accept="application/json,.json" style="display:none" onchange="restoreData(event)">
@@ -281,6 +295,16 @@
     <div class="hint">Turn stars into real money. Only grown-ups can move money.</div>
     <div id="bankBody"></div>
     <div class="row"><button class="btn ghost" onclick="closeBank()">Close</button></div>
+  </div>
+</div>
+<div id="reportArea" aria-hidden="true"></div>
+<!-- Approvals -->
+<div class="modal" id="approvalsModal" role="dialog" aria-modal="true" aria-labelledby="approvalsTitle">
+  <div class="card">
+    <h3 id="approvalsTitle">✅ Approvals</h3>
+    <div class="hint">Tasks kids marked done, waiting for a grown-up to confirm.</div>
+    <div id="approvalsBody"></div>
+    <div class="row"><button class="btn ghost" onclick="closeApprovals()">Close</button></div>
   </div>
 </div>
 <!-- Pet picker -->
@@ -351,10 +375,18 @@ const COACH = [
 ];
 const DEFAULT = {
   version:SCHEMA,
-  settings:{sound:true,haptics:true,theme:"auto",pin:"",reminders:[],starsPerDollar:15},
+  settings:{sound:true,haptics:true,theme:"auto",pin:"",reminders:[],starsPerDollar:15,syncCode:"",requireApproval:false},
   familyGoal:{emoji:"🍕",name:"Family Movie Night",target:150},
   familyProgress:0,
   activity:[],
+  pending:[],
+  redemptions:[],
+  coopTasks:[
+    {emoji:"🧹",label:"Tidy Together",bonus:15},
+    {emoji:"🍽️",label:"Set the Table",bonus:10}
+  ],
+  coopDone:{},
+  bonusDay:"",
   lastDay:null,
   kids:[
     {name:"Kid 1", avatar:"🦁", points:0, goal:50, weeklyGoal:100, pet:"puppy",  petName:"", counts:{}, history:{}, todayEarned:0, lifetimePoints:0, lifetimeTasks:0, happiness:60, badges:[]},
@@ -391,13 +423,17 @@ function migrateKid(k){
   k.lifetimeTasks=k.lifetimeTasks||0; k.happiness=(typeof k.happiness==='number')?k.happiness:60;
   k.badges=k.badges||[]; k.petName=k.petName||""; k.weeklyGoal=k.weeklyGoal||100;
   k.bank=(typeof k.bank==='number')?k.bank:0;
+  k.lastMystery=k.lastMystery||"";
   return k;
 }
 function migrate(d){
-  d.settings=Object.assign({sound:true,haptics:true,theme:"auto",pin:"",reminders:[],starsPerDollar:15}, d.settings||{});
+  d.settings=Object.assign({sound:true,haptics:true,theme:"auto",pin:"",reminders:[],starsPerDollar:15,syncCode:"",requireApproval:false}, d.settings||{});
+  if(d.settings.syncCode && !/^[a-zA-Z0-9-]{6,40}$/.test(d.settings.syncCode)) d.settings.syncCode="";
   if(typeof d.settings.starsPerDollar!=='number'||d.settings.starsPerDollar<1){ d.settings.starsPerDollar=15; }
   d.familyGoal=d.familyGoal||{emoji:"🍕",name:"Family Movie Night",target:150};
-  d.familyProgress=d.familyProgress||0; d.activity=d.activity||[];
+  d.familyProgress=d.familyProgress||0; d.activity=d.activity||[]; d.pending=d.pending||[]; d.redemptions=d.redemptions||[];
+  d.coopTasks=d.coopTasks||[{emoji:"🧹",label:"Tidy Together",bonus:15},{emoji:"🍽️",label:"Set the Table",bonus:10}];
+  d.coopDone=d.coopDone||{}; d.bonusDay=d.bonusDay||"";
   d.lastDay=d.lastDay||TODAY(); d.version=SCHEMA;
   (d.kids||[]).forEach(migrateKid);
   return d;
@@ -408,7 +444,7 @@ function load(){
   }catch(e){}
   return migrate(JSON.parse(JSON.stringify(DEFAULT)));
 }
-function save(){ try{localStorage.setItem("starSquad",JSON.stringify(S))}catch(e){} }
+function save(){ S.updatedAt=Date.now(); try{localStorage.setItem("starSquad",JSON.stringify(S))}catch(e){} schedulePush(); }
 function clampActive(){ if(active>=S.kids.length) active=S.kids.length-1; if(active<0) active=0; }
 /* ---------- activity log ---------- */
 function logAct(type,kidName,text){
@@ -446,14 +482,15 @@ function weekEarned(k){
 function autoRollover(){
   const today=TODAY();
   if(S.lastDay===today) return false;
-  // bank each kid's earnings into the day they belong to (lastDay)
   const bankDay=S.lastDay||today;
   S.kids.forEach(k=>{
     if((k.todayEarned||0)>0){ k.history[bankDay]=(k.history[bankDay]||0)+k.todayEarned; }
     k.todayEarned=0; k.counts={}; k.done=[];
     k.happiness=Math.max(20,(k.happiness||60)-10);
   });
-  S.lastDay=today; save();
+  S.lastDay=today;
+  if(Math.random()<1/6) S.bonusDay=today;
+  save();
   return true;
 }
 /* ---------- theme ---------- */
@@ -526,6 +563,12 @@ function render(){
       <button class="redeem" aria-label="Redeem ${esc(p.name)} for ${p.cost} stars" onclick="redeem(${i})">Get it!</button>
     </div>`).join("");
   const sb=document.getElementById("soundBtn"); if(sb) sb.textContent=(S.settings.sound?"🔊":"🔇")+" Sound";
+  renderApprovalBadge();
+  const bb=document.getElementById("bonusBanner");
+  if(bb){ const isBonus=S.bonusDay===TODAY(); bb.style.display=isBonus?"inline-block":"none"; if(isBonus) bb.textContent="✨ DOUBLE STAR DAY! Every task pays 2x today! ✨"; }
+  const mb=document.getElementById("mysteryBtn");
+  if(mb){ const openToday=S.kids[active].lastMystery!==TODAY(); mb.disabled=!openToday; mb.textContent=openToday?"🎁 Open Today's Mystery Box":"🎁 Opened — see you tomorrow!"; mb.style.opacity=openToday?1:.55; }
+  renderTeam();
   save();
 }
 function renderFamily(){
@@ -594,34 +637,158 @@ function confirmBox(title,msg,onYes){
 function closeConfirm(){ closeM("confirmModal"); confirmCb=null; }
 document.getElementById("confirmYes").addEventListener("click",()=>{ const cb=confirmCb; closeConfirm(); if(cb)cb(); });
 /* ---------- actions ---------- */
-const CHEERS=["YAY!","AWESOME!","WOOHOO!","SUPERSTAR!","NICE!","AMAZING!","GO YOU!","HIGH FIVE!"];
 function doTask(i){
   const k=S.kids[active];
+  if(S.settings.requireApproval){
+    S.pending.push({id:Date.now()+Math.random(),kidIdx:active,kidName:k.name,taskIdx:i,taskLabel:S.tasks[i].label,taskEmoji:S.tasks[i].emoji,val:S.tasks[i].val,ts:Date.now()});
+    save(); renderApprovalBadge(); haptic(10); ding();
+    toastMsgOnly(`⏳ Sent "${S.tasks[i].label}" for approval`);
+    return;
+  }
   undoSnap=snapshot(active);
+  const r=creditTask(active,i);
+  haptic(15); ding(); render(); petAnim('petPop .6s ease');
+  if(r.crossedGoal) goalCelebrate(k);
+  else if(r.newBadges.length){ celebrate(r.newBadges[0].emoji+" "+r.newBadges[0].name.toUpperCase()+"!"); ding(true); }
+  else celebrate(CHEERS[Math.floor(Math.random()*CHEERS.length)]);
+  showUndo(`+${r.val}⭐ for ${k.name}`);
+}
+function creditTask(kidIdx,i){
+  const k=S.kids[kidIdx], task=S.tasks[i];
+  if(!task) return {val:0,crossedGoal:false,newBadges:[]};
   k.counts=k.counts||{}; k.counts[i]=(k.counts[i]||0)+1;
-  const before=k.points, val=S.tasks[i].val;
+  const before=k.points, mult=(S.bonusDay===TODAY())?2:1, val=task.val*mult;
   k.points+=val; k.todayEarned=(k.todayEarned||0)+val;
   k.lifetimePoints=(k.lifetimePoints||0)+val; k.lifetimeTasks=(k.lifetimeTasks||0)+1;
   k.happiness=Math.min(100,(k.happiness||60)+6);
   S.familyProgress=(S.familyProgress||0)+val;
   const crossedGoal=before<k.goal && k.points>=k.goal;
-  const newBadges=checkBadges(active);
-  logAct("earn",k.name,`+${val}⭐ ${S.tasks[i].label}`);
-  haptic(15); ding(); render(); petAnim('petPop .6s ease');
-  if(crossedGoal) goalCelebrate(k);
-  else if(newBadges.length){ celebrate(newBadges[0].emoji+" "+newBadges[0].name.toUpperCase()+"!"); ding(true); }
-  else celebrate(CHEERS[Math.floor(Math.random()*CHEERS.length)]);
-  showUndo(`+${val}⭐ for ${k.name}`);
+  const newBadges=checkBadges(kidIdx);
+  logAct("earn",k.name,`+${val}⭐ ${task.label}${mult>1?' (2x!)':''}`);
+  return {val,crossedGoal,newBadges};
+}
+/* ---------- approvals ---------- */
+function renderApprovalBadge(){
+  const b=document.getElementById("approvalsBadge"); if(!b) return;
+  const n=(S.pending||[]).length; b.style.display=n?"inline-block":"none"; b.textContent=n;
+}
+function openApprovals(){ renderApprovals(); openM("approvalsModal"); }
+function closeApprovals(){ closeM("approvalsModal"); }
+function renderApprovals(){
+  document.getElementById("approvalsBody").innerHTML=(S.pending||[]).length?S.pending.map(p=>`
+    <div class="kidedit">
+      <div class="kidhead"><b>${esc(p.taskEmoji)} ${esc(p.taskLabel)}</b><span style="font-weight:800;color:var(--star)">+${p.val}⭐</span></div>
+      <div class="hint" style="margin:2px 0 8px">${esc(p.kidName)} · ${timeAgo(p.ts)} ago</div>
+      <textarea data-note-for="${p.id}" placeholder="Add a note (optional) — what happened, how it went…" style="width:100%;padding:9px 11px;border-radius:12px;border:2px solid var(--line);background:var(--panel);color:var(--ink);font-family:inherit;font-size:13px;resize:vertical;min-height:44px"></textarea>
+      <div class="bonusrow">
+        <button type="button" class="bb cash" onclick="approvePending(${JSON.stringify(p.id)})">✅ Approve</button>
+        <button type="button" class="bb" style="background:var(--rose);color:#7a2f42" onclick="rejectPending(${JSON.stringify(p.id)})">✖ Decline</button>
+      </div>
+    </div>`).join(""):`<div class="hint">No pending approvals. 🎉</div>`;
+}
+function approvePending(id){
+  const idx=S.pending.findIndex(p=>p.id===id); if(idx<0) return;
+  const p=S.pending[idx]; S.pending.splice(idx,1);
+  const noteEl=document.querySelector(`[data-note-for="${id}"]`); const note=noteEl?noteEl.value.trim():"";
+  active=p.kidIdx; clampActive();
+  const k=S.kids[active];
+  undoSnap=snapshot(active);
+  const r=creditTask(active,p.taskIdx);
+  if(note) logAct("note",k.name,`📝 ${note} (${p.taskEmoji} ${p.taskLabel})`);
+  save(); renderApprovals(); renderApprovalBadge(); render();
+  if(r.crossedGoal) goalCelebrate(k); else celebrate("✅ APPROVED! +"+r.val+"⭐");
+  ding(true); haptic(15);
+}
+function rejectPending(id){
+  const idx=S.pending.findIndex(p=>p.id===id); if(idx<0) return;
+  const p=S.pending[idx]; S.pending.splice(idx,1);
+  const noteEl=document.querySelector(`[data-note-for="${id}"]`); const note=noteEl?noteEl.value.trim():"";
+  logAct("declined",p.kidName,`Declined: ${p.taskEmoji} ${p.taskLabel}${note?' — '+note:''}`);
+  save(); renderApprovals(); renderApprovalBadge();
+}
+function toggleApproval(){ readAllEdits(); S.settings.requireApproval=!S.settings.requireApproval; renderParent(); }
+/* ---------- mystery box ---------- */
+const MYSTERY_REWARDS=[
+  {emoji:"⭐",label:"A shiny star",stars:3,w:30},
+  {emoji:"✨",label:"Sparkle bonus",stars:5,w:25},
+  {emoji:"🍀",label:"Lucky find",stars:6,w:20},
+  {emoji:"🌈",label:"Rainbow surprise",stars:8,w:12},
+  {emoji:"🎉",label:"Party bonus",stars:12,w:8},
+  {emoji:"💎",label:"JACKPOT",stars:20,w:5}
+];
+function pickMystery(){
+  const total=MYSTERY_REWARDS.reduce((s,r)=>s+r.w,0); let r=Math.random()*total;
+  for(const item of MYSTERY_REWARDS){ if(r<item.w) return item; r-=item.w; }
+  return MYSTERY_REWARDS[0];
+}
+function openMystery(){
+  const k=S.kids[active];
+  if(k.lastMystery===TODAY()){ toastMsgOnly("🎁 Already opened today — come back tomorrow!"); return; }
+  const btn=document.getElementById("mysteryBtn");
+  if(btn){ btn.disabled=true; if(!REDUCE) btn.style.animation="petShake .5s ease"; }
+  haptic(10); ding();
+  setTimeout(()=>{
+    const reward=pickMystery();
+    k.lastMystery=TODAY();
+    k.points+=reward.stars; k.todayEarned=(k.todayEarned||0)+reward.stars; k.lifetimePoints=(k.lifetimePoints||0)+reward.stars;
+    S.familyProgress=(S.familyProgress||0)+reward.stars;
+    logAct("mystery",k.name,`${reward.emoji} ${reward.label} (+${reward.stars}⭐)`);
+    checkBadges(active); save(); render();
+    celebrate(reward.emoji+" "+reward.label.toUpperCase()+"! +"+reward.stars+"⭐");
+    fireConfetti(reward.stars>=15?160:90); ding(true); haptic([15,40,15]);
+  },550);
+}
+/* ---------- team missions (sibling co-op) ---------- */
+function renderTeam(){
+  const el=document.getElementById("teamMissions"); if(!el) return;
+  const today=TODAY();
+  const doneToday=(S.coopDone&&S.coopDone[today])||{};
+  el.innerHTML=(S.coopTasks||[]).length?S.coopTasks.map((t,i)=>{
+    const joined=doneToday[i]||[];
+    const allIn=joined.length>=S.kids.length;
+    const iJoined=joined.includes(active);
+    const avatars=S.kids.map((k,ki)=>`<span style="opacity:${joined.includes(ki)?1:.25};font-size:20px" title="${esc(k.name)}">${esc(k.avatar)}</span>`).join(" ");
+    return `<div class="prize" style="min-width:150px;${allIn?'border-color:var(--mint)':''}">
+      <div class="pe" aria-hidden="true">${esc(t.emoji)}</div>
+      <div class="pn">${esc(t.label)}</div>
+      <div class="pc">+${t.bonus}⭐ each</div>
+      <div style="margin:6px 0">${avatars}</div>
+      <button class="redeem" style="opacity:1;pointer-events:${allIn||iJoined?'none':'auto'};${allIn?'background:var(--mint)':iJoined?'opacity:.5':''}" onclick="joinTeamTask(${i})">${allIn?'Done today! 🎉':iJoined?'Waiting for others…':'We did it!'}</button>
+    </div>`;
+  }).join(""):`<div class="hint">No team missions yet — add some in Grown-Up Settings.</div>`;
+}
+function joinTeamTask(i){
+  const today=TODAY(); S.coopDone=S.coopDone||{}; S.coopDone[today]=S.coopDone[today]||{};
+  const list=S.coopDone[today][i]=S.coopDone[today][i]||[];
+  if(list.includes(active)) return;
+  list.push(active);
+  const t=S.coopTasks[i], k=S.kids[active];
+  logAct("team",k.name,`🤝 Joined: ${t.emoji} ${t.label}`);
+  haptic(10); ding();
+  if(list.length>=S.kids.length){
+    S.kids.forEach((kk,ki)=>{ kk.points+=t.bonus; kk.todayEarned=(kk.todayEarned||0)+t.bonus; kk.lifetimePoints=(kk.lifetimePoints||0)+t.bonus; checkBadges(ki); });
+    S.familyProgress=(S.familyProgress||0)+t.bonus*S.kids.length;
+    logAct("team","Squad",`🎉 TEAM UP! ${t.emoji} ${t.label} — everyone +${t.bonus}⭐`);
+    celebrate("🤝 TEAM UP! +"+t.bonus+"⭐ EACH!"); fireConfetti(160); ding("fanfare"); haptic([20,60,20,60,20]);
+  } else { celebrate(esc(k.name)+" JOINED IN!"); }
+  save(); render();
 }
 function redeem(i){
   const p=S.prizes[i], k=S.kids[active];
   if(k.points<p.cost) return;
   confirmBox("Spend "+p.cost+" ⭐?",`Trade ${p.cost} stars for ${p.emoji} ${p.name}?`,()=>{
     undoSnap=snapshot(active); k.points-=p.cost;
+    S.redemptions=S.redemptions||[];
+    S.redemptions.unshift({id:Date.now()+Math.random(),kidIdx:active,kidName:k.name,emoji:p.emoji,name:p.name,cost:p.cost,ts:Date.now(),delivered:false});
+    if(S.redemptions.length>200) S.redemptions.length=200;
     logAct("redeem",k.name,`${p.emoji} ${p.name} (−${p.cost}⭐)`);
     celebrate(p.emoji+" "+p.name.toUpperCase()+"!"); haptic([15,40,15]); ding(true);
     render(); petAnim('petShake .5s ease'); showUndo(`Redeemed ${p.name}`);
   });
+}
+function markDelivered(id){
+  const r=(S.redemptions||[]).find(x=>x.id===id); if(!r) return;
+  r.delivered=!r.delivered; save(); renderStats();
 }
 function redeemFamily(){
   const fg=S.familyGoal; if((S.familyProgress||0)<fg.target) return;
@@ -701,7 +868,9 @@ function scheduleReminders(){
 function fireReminder(r){
   const msg=r.label||"Star Squad time!";
   if(('Notification'in window)&&Notification.permission==="granted"){
-    try{ new Notification("⭐ Star Squad",{body:msg}); }catch(e){ toastMsgOnly("⏰ "+msg); }
+    if(navigator.serviceWorker&&navigator.serviceWorker.ready){
+      navigator.serviceWorker.ready.then(reg=>reg.showNotification("⭐ Star Squad",{body:msg,tag:"star-squad-reminder"})).catch(()=>{ try{ new Notification("⭐ Star Squad",{body:msg}); }catch(e){ toastMsgOnly("⏰ "+msg); } });
+    } else { try{ new Notification("⭐ Star Squad",{body:msg}); }catch(e){ toastMsgOnly("⏰ "+msg); } }
   } else { toastMsgOnly("⏰ "+msg); }
   ding(true);
 }
@@ -816,7 +985,35 @@ function renderStats(){
     </div>`;
   }).join("");
   const acts=(S.activity||[]).slice(0,20).map(a=>`<div class="a"><span>${esc(a.kid)}: ${esc(a.text)}</span><small>${timeAgo(a.t)}</small></div>`).join("")||`<div class="hint">No activity yet.</div>`;
-  document.getElementById("statsBody").innerHTML=kidHtml+`<div class="actlog"><b style="font-family:'Baloo 2';font-size:14px;color:var(--ink)">📜 Recent activity</b>${acts}</div>`;
+  const redHtml=(S.redemptions||[]).slice(0,30).map(r=>`<div class="a"><span>${esc(r.kidName)}: ${esc(r.emoji)} ${esc(r.name)} (${r.cost}⭐)</span><button class="btn" style="padding:3px 10px;font-size:11px${r.delivered?';opacity:.5':''}" onclick="markDelivered(${JSON.stringify(r.id)})">${r.delivered?'✅ Delivered':'Mark delivered'}</button></div>`).join("")||`<div class="hint">No redemptions yet.</div>`;
+  document.getElementById("statsBody").innerHTML=kidHtml+`<div class="actlog"><b style="font-family:'Baloo 2';font-size:14px;color:var(--ink)">📜 Recent activity</b>${acts}</div>`+`<div class="actlog"><b style="font-family:'Baloo 2';font-size:14px;color:var(--ink)">🎁 Prize history</b>${redHtml}</div>`;
+}
+/* ---------- weekly report (print/PDF) ---------- */
+function openReport(){
+  const dateStr=new Date().toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  const rows=S.kids.map(k=>{
+    const badges=(k.badges||[]).map(bk=>{const b=BADGES.find(x=>x.key===bk);return b?b.emoji:"";}).join(" ")||"—";
+    return `<tr><td style="padding:8px;border-bottom:1px solid #ddd;text-align:left">${esc(k.avatar)} ${esc(k.name)}</td><td style="padding:8px;border-bottom:1px solid #ddd">${weekEarned(k)}</td><td style="padding:8px;border-bottom:1px solid #ddd">${streakOf(k)}</td><td style="padding:8px;border-bottom:1px solid #ddd">${bestStreak(k)}</td><td style="padding:8px;border-bottom:1px solid #ddd;text-align:left">${badges}</td></tr>`;
+  }).join("");
+  const redRows=(S.redemptions||[]).slice(0,25).map(r=>`<tr><td style="padding:6px;border-bottom:1px solid #eee;text-align:left">${esc(r.kidName)}</td><td style="padding:6px;border-bottom:1px solid #eee;text-align:left">${esc(r.emoji)} ${esc(r.name)}</td><td style="padding:6px;border-bottom:1px solid #eee">${r.cost}⭐</td><td style="padding:6px;border-bottom:1px solid #eee;text-align:left">${new Date(r.ts).toLocaleDateString()}</td><td style="padding:6px;border-bottom:1px solid #eee;text-align:left">${r.delivered?"✅ Delivered":"⏳ Pending"}</td></tr>`).join("")||`<tr><td colspan="5" style="padding:6px;color:#999">No redemptions yet.</td></tr>`;
+  document.getElementById("reportArea").innerHTML=`
+    <div style="font-family:'Baloo 2',sans-serif;max-width:720px;margin:0 auto;padding:30px;color:#3a2e2a">
+      <h1 style="font-size:26px;margin-bottom:2px">⭐ Star Squad — Weekly Report</h1>
+      <div style="color:#77655d;font-size:13px;margin-bottom:20px">${dateStr}</div>
+      <h2 style="font-size:16px;margin-bottom:8px">This Week</h2>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:24px">
+        <tr style="background:#f5ede6"><th style="padding:8px;text-align:left">Kid</th><th style="padding:8px">Stars this week</th><th style="padding:8px">Streak</th><th style="padding:8px">Best streak</th><th style="padding:8px;text-align:left">Badges</th></tr>
+        ${rows}
+      </table>
+      <h2 style="font-size:16px;margin-bottom:8px">Family Goal</h2>
+      <div style="font-size:13px;margin-bottom:24px">${esc(S.familyGoal.emoji)} ${esc(S.familyGoal.name)}: ${S.familyProgress||0} / ${S.familyGoal.target} ⭐</div>
+      <h2 style="font-size:16px;margin-bottom:8px">Prize Redemptions</h2>
+      <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+        <tr style="background:#f5ede6"><th style="padding:6px;text-align:left">Kid</th><th style="padding:6px;text-align:left">Prize</th><th style="padding:6px">Cost</th><th style="padding:6px;text-align:left">Date</th><th style="padding:6px;text-align:left">Status</th></tr>
+        ${redRows}
+      </table>
+    </div>`;
+  window.print();
 }
 /* ---------- parent settings ---------- */
 function renderParent(){
@@ -834,6 +1031,14 @@ function renderParent(){
      <div id="prizeEdit"></div>
      <button class="btn miniadd" onclick="addPrize()">➕ Add a Prize</button>
      <hr style="border:none;border-top:2px solid var(--line);margin:20px 0 6px">
+     <label style="font-size:15px;color:var(--ink);font-weight:800">🤝 Team Missions</label>
+     <div class="hint">Everyone must join the same day to earn the bonus — great for sibling teamwork.</div>
+     <div id="coopEdit"></div>
+     <button class="btn miniadd" onclick="addCoop()">➕ Add a Team Mission</button>
+     <hr style="border:none;border-top:2px solid var(--line);margin:20px 0 6px">
+     <label style="font-size:15px;color:var(--ink);font-weight:800">🎁 Mystery Box &amp; Bonus Days</label>
+     <div class="hint">Each kid can open one Mystery Box a day for a surprise star reward. About 1 in 6 days is randomly a Double Star Day — shown as a banner up top.</div>
+     <hr style="border:none;border-top:2px solid var(--line);margin:20px 0 6px">
      <label style="font-size:15px;color:var(--ink);font-weight:800">🎯 Family goal</label>
      <div style="display:flex;gap:6px;align-items:center;margin-top:8px">
        <input id="fgE" value="${esc(S.familyGoal.emoji)}" maxlength="4" style="width:52px;text-align:center;padding:9px 4px">
@@ -848,6 +1053,22 @@ function renderParent(){
      <button class="btn miniadd" onclick="addReminder()">➕ Add a Reminder</button>
      <button class="btn" style="width:100%;margin-top:8px" onclick="requestReminderPermission()">Enable phone notifications</button>
      <hr style="border:none;border-top:2px solid var(--line);margin:20px 0 6px">
+     <label style="font-size:15px;color:var(--ink);font-weight:800">☁️ Cloud Sync (beta)</label>
+     <div class="hint">Connect two devices with the same family code so both auto-update over the internet. Needs Wi-Fi/data on both; updates arrive every ~8 seconds.</div>
+     ${s.syncCode?`
+       <div class="hint" id="syncStatus" style="font-weight:700">☁️ Connected</div>
+       <div style="display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap">
+         <input value="${esc(s.syncCode)}" readonly style="flex:1;min-width:120px;font-weight:800;letter-spacing:1px">
+         <button type="button" class="btn" onclick="copySyncCode()">📋 Copy code</button>
+         <button type="button" class="btn" style="border-color:var(--rose);color:#b25a6e" onclick="disconnectSync()">✖ Disconnect</button>
+       </div>`:`
+       <div style="display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap">
+         <input id="syncCodeInput" placeholder="Enter family code to join" style="flex:1;min-width:140px">
+         <button type="button" class="btn" onclick="joinSyncCode()">🔄 Join</button>
+       </div>
+       <button type="button" class="btn" style="width:100%;margin-top:8px" onclick="createSyncCode()">☁️ Create New Family Code</button>
+       <div class="hint" id="syncStatus"></div>`}
+     <hr style="border:none;border-top:2px solid var(--line);margin:20px 0 6px">
      <label style="font-size:15px;color:var(--ink);font-weight:800">🏦 Star Bank</label>
      <div style="display:flex;gap:8px;align-items:center;margin-top:6px"><input id="rateSet" type="number" min="1" step="1" value="${s.starsPerDollar||15}" style="width:74px;text-align:center"><span style="font-size:13px;color:var(--ink-soft);font-weight:700">⭐ = $1</span></div>
      <div class="hint">Open 🏦 Bank on the main screen to convert stars &amp; pay out.</div>
@@ -857,10 +1078,11 @@ function renderParent(){
      <label style="font-size:15px;color:var(--ink);font-weight:800;margin-top:16px">📳 Extras</label>
      <div class="seg" style="margin-top:6px">
        <button type="button" id="hapBtn" class="${s.haptics?'sel':''}" onclick="toggleHaptics()">📳 Vibrate: ${s.haptics?'On':'Off'}</button>
+       <button type="button" id="apprBtn" class="${s.requireApproval?'sel':''}" onclick="toggleApproval()">🧐 Approval needed: ${s.requireApproval?'On':'Off'}</button>
        <button type="button" onclick="startCoach(true)">👋 Replay tutorial</button>
        <button type="button" onclick="newDayNow()">🔄 New Day now</button>
      </div>`;
-  renderKidsEdit(); renderTaskEdit(); renderPrizeEdit(); renderRemEdit();
+  renderKidsEdit(); renderTaskEdit(); renderPrizeEdit(); renderRemEdit(); renderCoopEdit();
 }
 function setTheme(k){ readAllEdits(); S.settings.theme=k; applyTheme(); renderParent(); }
 function toggleHaptics(){ readAllEdits(); S.settings.haptics=!S.settings.haptics; renderParent(); haptic(20); }
@@ -921,6 +1143,18 @@ function renderPrizeEdit(){
 function readPrizeEdit(){ S.prizes=S.prizes.map((p,i)=>({emoji:(gv("pe"+i)||p.emoji).trim()||"🎁",name:(gv("pn"+i)||p.name).trim()||"Prize",cost:Math.max(1,parseInt(gv("pc"+i))||p.cost)})); }
 function addPrize(){ readAllEdits(); S.prizes.push({emoji:"🎁",name:"New Prize",cost:25}); renderPrizeEdit(); }
 function removePrize(i){ readAllEdits(); S.prizes.splice(i,1); renderPrizeEdit(); }
+function renderCoopEdit(){
+  document.getElementById("coopEdit").innerHTML=(S.coopTasks||[]).map((t,i)=>`
+    <div style="display:flex;gap:6px;align-items:center;margin-top:8px">
+      <input id="ce${i}" value="${esc(t.emoji)}" maxlength="4" style="width:50px;text-align:center;padding:9px 4px" placeholder="🤝">
+      <input id="cl${i}" value="${esc(t.label)}" style="flex:1;padding:9px 11px" placeholder="Mission name">
+      <input id="cb${i}" type="number" value="${t.bonus}" style="width:62px;padding:9px 6px" title="Bonus per kid">
+      <button class="btn" style="padding:9px 11px;border-color:var(--rose);color:#b25a6e" onclick="removeCoop(${i})">🗑️</button>
+    </div>`).join("")||`<div class="hint">No team missions yet.</div>`;
+}
+function readCoopEdit(){ S.coopTasks=(S.coopTasks||[]).map((t,i)=>({emoji:(gv("ce"+i)||t.emoji).trim()||"🤝",label:(gv("cl"+i)||t.label).trim()||"Team Mission",bonus:Math.max(1,parseInt(gv("cb"+i))||t.bonus)})); }
+function addCoop(){ readAllEdits(); S.coopTasks=S.coopTasks||[]; S.coopTasks.push({emoji:"🤝",label:"New Mission",bonus:10}); renderCoopEdit(); }
+function removeCoop(i){ readAllEdits(); S.coopTasks.splice(i,1); renderCoopEdit(); }
 function renderRemEdit(){
   document.getElementById("remEdit").innerHTML=(S.settings.reminders||[]).map((r,i)=>`
     <div style="display:flex;gap:6px;align-items:center;margin-top:8px">
@@ -937,8 +1171,8 @@ function readMisc(){
   S.settings.starsPerDollar=Math.max(1,parseInt(gv("rateSet"))||15);
   S.settings.pin=(gv("pinSet")||"").replace(/\D/g,"").slice(0,4);
 }
-function readAllEdits(){ if(document.getElementById("kn0")||document.getElementById("kidsEdit")){readKidsEdit();readTaskEdit();readPrizeEdit();readRemEdit();readMisc();} }
-function closeParent(){ closeM("modal"); }
+function readAllEdits(){ if(document.getElementById("kn0")||document.getElementById("kidsEdit")){readKidsEdit();readTaskEdit();readPrizeEdit();readRemEdit();readCoopEdit();readMisc();} }
+function closeParent(){ parentUnlocked=false; closeM("modal"); }
 function saveParent(){ readAllEdits(); closeParent(); applyTheme(); scheduleReminders(); render(); }
 /* ---------- pet picker ---------- */
 let petKidIdx=0;
@@ -966,6 +1200,87 @@ function showCoach(){
 }
 function nextCoach(){ if(coachStep<COACH.length-1){ coachStep++; showCoach(); } else skipCoach(); }
 function skipCoach(){ document.getElementById("coach").classList.remove("show"); try{localStorage.setItem("starSquadTutorial","1");}catch(e){} }
+/* ---------- cloud sync (beta, best-effort via kvdb.io) ---------- */
+let lastPushedJSON="", pushTimer=null, syncPollTimer=null;
+function setSyncStatus(txt){ const el=document.getElementById("syncStatus"); if(el) el.textContent=txt; }
+function schedulePush(){ if(!S.settings.syncCode) return; clearTimeout(pushTimer); pushTimer=setTimeout(()=>pushRemote(false),1500); }
+async function pushRemote(force){
+  if(!S.settings.syncCode) return;
+  const json=JSON.stringify(S);
+  if(!force && json===lastPushedJSON) return;
+  setSyncStatus("Syncing…");
+  try{
+    await fetch("https://jsonblob.com/api/jsonBlob/"+S.settings.syncCode,{method:"PUT",headers:{"Content-Type":"application/json"},body:json});
+    lastPushedJSON=json; setSyncStatus("☁️ Synced just now");
+  }catch(e){ setSyncStatus("⚠️ Offline — will retry"); }
+}
+async function pullRemote(initial){
+  if(!S.settings.syncCode) return;
+  setSyncStatus("Checking for updates…");
+  try{
+    const r=await fetch("https://jsonblob.com/api/jsonBlob/"+S.settings.syncCode);
+    if(r.status===404){ setSyncStatus("⚠️ Code not found"); return; }
+    const text=await r.text();
+    if(!text){ setSyncStatus("No cloud data yet"); return; }
+    const d=JSON.parse(text);
+    if(d&&d.kids&&(initial||(d.updatedAt||0)>(S.updatedAt||0))){
+      S=migrate(d); active=0; clampActive(); lastPushedJSON=text; save(); applyTheme(); render();
+      setSyncStatus("☁️ Synced just now");
+    } else setSyncStatus("☁️ Up to date");
+  }catch(e){ setSyncStatus("⚠️ Offline — will retry"); }
+}
+function startSyncPolling(){
+  clearInterval(syncPollTimer);
+  if(!S.settings.syncCode) return;
+  syncPollTimer=setInterval(()=>pullRemote(false),8000);
+}
+async function createSyncCode(){
+  readAllEdits();
+  setSyncStatus("Creating code…");
+  try{
+    const r=await fetch("https://jsonblob.com/api/jsonBlob",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(S)});
+    const loc=r.headers.get("Location")||"";
+    const id=loc.split("/").filter(Boolean).pop();
+    if(!id) throw new Error("no id");
+    S.settings.syncCode=id; lastPushedJSON=JSON.stringify(S); save(); startSyncPolling(); renderParent();
+  }catch(e){ alert("Couldn't reach the cloud. Check your internet connection and try again."); }
+}
+function joinSyncCode(){
+  readAllEdits();
+  const code=(gv("syncCodeInput")||"").trim();
+  if(!code) return;
+  S.settings.syncCode=code; save(); pullRemote(true); startSyncPolling(); renderParent();
+}
+function disconnectSync(){ readAllEdits(); S.settings.syncCode=""; clearInterval(syncPollTimer); save(); renderParent(); }
+function copySyncCode(){
+  const code=S.settings.syncCode; if(!code) return;
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(code).then(()=>toastMsgOnly("Code copied: "+code)).catch(()=>window.prompt("Family code:",code));
+  else window.prompt("Family code:",code);
+}
+/* ---------- share link (device-to-device sync) ---------- */
+function shareLink(){
+  try{
+    const data=btoa(encodeURIComponent(JSON.stringify(S)));
+    const url=location.origin+location.pathname+"#sync="+data;
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(()=>celebrate("LINK COPIED! 🔗")).catch(()=>promptShareUrl(url));
+    } else promptShareUrl(url);
+    if(navigator.share){ navigator.share({title:"Star Squad",text:"Open this to sync our Star Squad data",url}).catch(()=>{}); }
+  }catch(e){ alert("Couldn't create a share link on this device."); }
+}
+function promptShareUrl(url){ window.prompt("Copy this link and open it on the other device:",url); }
+function checkSyncLink(){
+  const m=location.hash.match(/sync=([^&]+)/);
+  if(!m) return;
+  history.replaceState(null,"",location.pathname+location.search);
+  try{
+    const d=JSON.parse(decodeURIComponent(atob(m[1])));
+    if(!(d&&d.kids&&d.tasks&&d.prizes)){ alert("That sync link looks broken."); return; }
+    confirmBox("Sync data from link?","This replaces everything on this device with the data from the link.",()=>{
+      S=migrate(d); active=0; save(); applyTheme(); scheduleReminders(); render(); celebrate("SYNCED! 🔗");
+    });
+  }catch(e){ alert("That sync link looks broken."); }
+}
 /* ---------- backup / restore ---------- */
 function backupData(){
   const blob=new Blob([JSON.stringify(S,null,2)],{type:"application/json"});
@@ -982,11 +1297,14 @@ function restoreData(e){
   r.readAsText(f); e.target.value="";
 }
 /* ---------- boot ---------- */
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('./sw.js').catch(()=>{}); }
 (function(){const d=document.getElementById("clouds");const e=["☁️","⭐","🌸","☁️","✨"];let h="";for(let i=0;i<7;i++){h+=`<i style="left:${Math.random()*90}%;top:${5+Math.random()*80}%;animation-delay:${-Math.random()*26}s;animation-duration:${20+Math.random()*16}s">${e[i%e.length]}</i>`}d.innerHTML=h})();
 applyTheme();
 autoRollover();
 render();
 scheduleReminders();
+checkSyncLink();
+if(S.settings.syncCode){ pullRemote(true); startSyncPolling(); }
 setInterval(()=>{ if(autoRollover()) render(); }, 60000);
 startCoach(false);
 </script>
